@@ -547,7 +547,7 @@ nav.tabs button:not(.active):hover {
 
 .insignia-container {
   width: 200px;
-  height: 200px;
+  height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -794,7 +794,7 @@ nav.tabs button:not(.active):hover {
 
 .ref-card .ref-insignia {
   width: 70px;
-  height: 70px;
+  height: 84px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1159,12 +1159,29 @@ function chevronPath(y, thickness=8, width=70, cx=50) {
   return `M${x1},${vy} L${cx},${peakY} L${x2},${vy} L${x2},${vy+thickness} L${cx},${peakY+thickness} L${x1},${vy+thickness} Z`;
 }
 
+function chevronPathDown(y, thickness=8, width=70, cx=50) {
+  // Downward-pointing chevron (inverted V)
+  const half = width/2;
+  const x1 = cx - half, x2 = cx + half;
+  const vy = y;
+  const peakY = y + half * 0.55;  // Point down instead of up
+  return `M${x1},${vy} L${cx},${peakY} L${x2},${vy} L${x2},${vy+thickness} L${cx},${peakY+thickness} L${x1},${vy+thickness} Z`;
+}
+
 function rockerPath(y, thickness=7, width=80, cx=50) {
   // Curved rocker (arc)
   const half = width/2;
   const x1 = cx - half, x2 = cx + half;
   const arcR = width * 0.9;
   return `M${x1},${y} A${arcR},${arcR} 0 0 0 ${x2},${y} L${x2},${y+thickness} A${arcR-thickness},${arcR-thickness} 0 0 1 ${x1},${y+thickness} Z`;
+}
+
+function rockerPathInverted(y, thickness=7, width=80, cx=50) {
+  // Inverted curved rocker (arc pointing upward, like an upside-down U)
+  const half = width/2;
+  const x1 = cx - half, x2 = cx + half;
+  const arcR = width * 0.9;
+  return `M${x1},${y+thickness} A${arcR},${arcR} 0 0 1 ${x2},${y+thickness} L${x2},${y} A${arcR-thickness},${arcR-thickness} 0 0 0 ${x1},${y} Z`;
 }
 
 function crossedRifles(cx=50, cy=50, size=18) {
@@ -1191,6 +1208,18 @@ function oakLeaf(cx=50, cy=50, size=18, fill='currentColor') {
   return `<g transform="translate(${cx},${cy}) scale(${size/20})">
     <path d="M0,-10 C3,-9 5,-6 4,-3 C7,-4 9,-1 8,2 C10,3 10,7 7,8 C5,10 2,9 0,7 C-2,9 -5,10 -7,8 C-10,7 -10,3 -8,2 C-9,-1 -7,-4 -4,-3 C-5,-6 -3,-9 0,-10 Z"
       fill="${fill}" stroke="#000" stroke-width="0.3" opacity="0.95"/>
+  </g>`;
+}
+
+function pineapple(cx=50, cy=50, size=18, fill='currentColor') {
+  // Stylized pineapple/grenade (USMC explosive ordnance symbol)
+  return `<g transform="translate(${cx},${cy}) scale(${size/20})">
+    <ellipse cx="0" cy="2" rx="6" ry="8" fill="${fill}" stroke="#000" stroke-width="0.4"/>
+    <path d="M-3,-6 L-2,-8 L-1,-9 L0,-9.5 L1,-9 L2,-8 L3,-6" fill="none" stroke="${fill}" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="-4" y1="0" x2="4" y2="0" stroke="#000" stroke-width="0.3"/>
+    <line x1="-4" y1="4" x2="4" y2="4" stroke="#000" stroke-width="0.3"/>
+    <line x1="-3" y1="7" x2="3" y2="7" stroke="#000" stroke-width="0.3"/>
+    <line x1="-3" y1="-2" x2="3" y2="-2" stroke="#000" stroke-width="0.3"/>
   </g>`;
 }
 
@@ -1238,15 +1267,17 @@ function armyChevron(config) {
 
   // Center device
   if (stars > 0) {
+    // Position stars lower, centered between chevrons and rockers
+    const centerY = rockers > 0 ? 50 : 45;
     if (stars === 1) {
-      elements += centerStar(50, 40, 5, color);
+      elements += centerStar(50, centerY, 6, color);
     } else if (stars === 2) {
-      elements += centerStar(42, 40, 4.5, color);
-      elements += centerStar(58, 40, 4.5, color);
+      elements += centerStar(42, centerY, 5.5, color);
+      elements += centerStar(58, centerY, 5.5, color);
     } else if (stars === 3) {
-      elements += centerStar(40, 40, 4, color);
-      elements += centerStar(50, 40, 4, color);
-      elements += centerStar(60, 40, 4, color);
+      elements += centerStar(40, centerY, 5, color);
+      elements += centerStar(50, centerY, 5, color);
+      elements += centerStar(60, centerY, 5, color);
     }
   }
 
@@ -1272,78 +1303,134 @@ function marinesChevron(config) {
   const color = '#c41e1e';  // Marine red
   const stroke = '#4a0000';
 
+  // Adjust positioning based on number of rockers to fit within bounds
+  // Bottom rockers - compress spacing when there are more rockers
+  const rockerStartY = rockers >= 4 ? 65 : (rockers === 3 ? 68 : 70);
+  const rockerSpacing = rockers >= 4 ? 5.5 : (rockers === 3 ? 7 : 8);
+  const rockerThickness = rockers >= 4 ? 4.5 : 5;
   for (let r = 0; r < rockers; r++) {
-    const y = 66 + r * 9;
-    elements += `<path d="${rockerPath(y, 6, 78)}" fill="${color}" stroke="${stroke}" stroke-width="0.5"/>`;
+    const y = rockerStartY + r * rockerSpacing;
+    elements += `<path d="${rockerPath(y, rockerThickness, 76)}" fill="${color}" stroke="${stroke}" stroke-width="0.5"/>`;
   }
 
-  const chevBaseY = rockers > 0 ? 54 - rockers * 2 : 60;
+  // Chevrons - adjust base position based on rockers
+  const chevBaseY = rockers >= 4 ? 48 : (rockers > 0 ? 52 : 60);
+  const chevSpacing = rockers >= 4 ? 7.5 : 9;
   for (let c = 0; c < chevrons; c++) {
-    const y = chevBaseY - c * 9;
+    const y = chevBaseY - c * chevSpacing;
     elements += `<path d="${chevronPath(y, 6, 60 + c * 5)}" fill="${color}" stroke="${stroke}" stroke-width="0.5"/>`;
   }
 
   if (rifles && chevrons >= 2) {
-    elements += `<g color="${color}">${crossedRifles(50, 72, 10)}</g>`;
+    // Position rifles centered between chevrons and rockers
+    const rifleY = rockers >= 4 ? 58 : (rockers > 0 ? 60 : 65);
+    elements += `<g color="${color}">${crossedRifles(50, rifleY, 10)}</g>`;
   }
 
   if (stars > 0) {
+    // Position stars centered between chevrons and rockers
+    const starY = rockers >= 4 ? 58 : (rockers > 0 ? 60 : 50);
+    const starSize = 6;
     for (let i = 0; i < stars; i++) {
-      const offset = (i - (stars-1)/2) * 11;
-      elements += centerStar(50 + offset, 40, 4.5, color);
+      const offset = (i - (stars-1)/2) * 13;
+      elements += centerStar(50 + offset, starY, starSize, color);
     }
   }
 
   if (bursting) {
-    // Eagle Globe Anchor simplified
-    elements += `<circle cx="50" cy="44" r="9" fill="none" stroke="${color}" stroke-width="1.8"/>`;
-    elements += `<path d="M44,48 Q50,42 56,48" fill="none" stroke="${color}" stroke-width="1.5"/>`;
-    elements += eagle(50, 38, 14, color);
+    // Eagle Globe Anchor simplified - centered between chevrons and rockers
+    const egaY = rockers >= 4 ? 58 : (rockers > 0 ? 60 : 50);
+    elements += `<circle cx="50" cy="${egaY}" r="11" fill="none" stroke="${color}" stroke-width="1.8"/>`;
+    elements += `<path d="M44,${egaY+4} Q50,${egaY-2} 56,${egaY+4}" fill="none" stroke="${color}" stroke-width="1.5"/>`;
+    elements += eagle(50, egaY-6, 16, color);
   }
 
   return svg(`
-    <rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+    <rect width="100" height="100" fill="#4b5320" rx="3"/>
     <g>${elements}</g>
   `);
 }
 
-// ============ AIR FORCE / SPACE FORCE STYLE ============
-// Chevrons with upward points, star in middle, single/double arc rockers
+// ============ AIR FORCE ENLISTED STYLE ============
+// Simplified geometry: horizontal stripes (wings) with circle in center
 
-function airforceChevron(config) {
+function airforceEnlisted(config) {
   const {
-    chevrons = 0,    // top stripes (inverted V, points up)
-    arcs = 0,        // arc lines below star
-    star = false,    // center 5-point star
-    topStar = false, // star above (Chief Master of AF)
-    doubleStar = false,
+    downwardChevrons = 0, // Main stripes (1-5 for E-2 through E-6, always 3 for E-7+)
+    rockers = 0,          // Bottom curved rockers (always 2 for E-7+)
+    upwardChevrons = 0,   // Top angular chevrons (1 for E-7, 2 for E-8, 3 for E-9)
+    star = false,         // Encircled star (E-2+, all have it)
+    diamond = false,      // First Sergeant diamond
+    topStar = false,      // CCM top star
+    seal = false,         // CMSAF seal with flanking stars
   } = config;
 
   let elements = '';
-  const color = '#c0c8d0';   // silver
-  const stroke = '#3a4a5a';
+  const silver = '#c0c8d0';
+  const blue = '#1a3a5c';
 
-  // Air force: chevrons point UPWARD, like inverted V stacks
-  // Top chevrons (outer to inner, smaller)
-  for (let c = 0; c < chevrons; c++) {
-    const y = 22 + c * 9;
-    const w = 76 - c * 8;
-    elements += `<path d="${chevronPath(y, 6, w)}" fill="${color}" stroke="${stroke}" stroke-width="0.4"/>`;
-  }
-
-  // Center star
+  // Circle (always centered at y=50)
   if (star) {
-    elements += centerStar(50, 56, 6, color);
+    elements += `<circle cx="50" cy="50" r="11" fill="${blue}" stroke="${silver}" stroke-width="1.8"/>`;
+    elements += centerStar(50, 50, 6, silver);
   }
 
-  // Arcs below star
-  for (let a = 0; a < arcs; a++) {
-    const y = 65 + a * 7;
-    elements += `<path d="${rockerPath(y, 5, 60 + a * 6)}" fill="${color}" stroke="${stroke}" stroke-width="0.4"/>`;
+  // Bottom rockers (upward facing - upside down rainbow)
+  if (rockers > 0) {
+    let rockerY = 72;
+    for (let r = 0; r < rockers; r++) {
+      elements += `<path d="${rockerPath(rockerY, 4, 76)}" fill="${silver}" stroke="${blue}" stroke-width="0.5"/>`;
+      rockerY += 5;
+    }
   }
 
+  // Main horizontal stripes (wings) - centered vertically on the circle
+  if (downwardChevrons > 0) {
+    const stripeThickness = 3;
+    const stripeGap = 1.5;
+    const totalHeight = downwardChevrons * stripeThickness + (downwardChevrons - 1) * stripeGap;
+    let y = 50 - totalHeight / 2;
+
+    for (let i = 0; i < downwardChevrons; i++) {
+      // Left stripe
+      elements += `<rect x="12" y="${y}" width="26" height="${stripeThickness}" fill="${silver}" stroke="${blue}" stroke-width="0.4"/>`;
+      // Right stripe
+      elements += `<rect x="62" y="${y}" width="26" height="${stripeThickness}" fill="${silver}" stroke="${blue}" stroke-width="0.4"/>`;
+      y += stripeThickness + stripeGap;
+    }
+  }
+
+  // Upward-pointing chevrons at top (E-7+)
+  let topChevronBottomY = 26;
+  if (upwardChevrons > 0) {
+    let chevY = 26;
+    for (let c = upwardChevrons - 1; c >= 0; c--) {
+      const width = 64 - (c * 6);
+      elements += `<path d="${chevronPath(chevY, 4, width)}" fill="${silver}" stroke="${blue}" stroke-width="0.5"/>`;
+      chevY -= 6;
+    }
+    topChevronBottomY = 26; // Bottom of the lowest upward chevron
+  }
+
+  // Calculate midpoint between top chevrons and star (star is at y=50, circle radius 11, top at ~39)
+  const starTopY = 39;
+  const midY = (topChevronBottomY + starTopY) / 2;
+
+  // Diamond (First Sergeant)
+  if (diamond) {
+    elements += `<path d="M50,${midY-4} L55,${midY} L50,${midY+4} L45,${midY} Z" fill="${silver}" stroke="${blue}" stroke-width="0.6"/>`;
+  }
+
+  // Top star (CCM)
   if (topStar) {
-    elements += centerStar(50, 16, 5, color);
+    elements += centerStar(50, midY, 4.5, silver);
+  }
+
+  // CMSAF seal with flanking stars
+  if (seal) {
+    elements += eagle(50, midY, 11, silver);
+    elements += centerStar(38, midY, 3, silver);
+    elements += centerStar(62, midY, 3, silver);
   }
 
   return svg(`
@@ -1353,71 +1440,74 @@ function airforceChevron(config) {
 }
 
 // ============ SPACE FORCE STYLE ============
-// Hexagonal border with delta and chevrons inside
+// Delta arrowhead with horizontal bars or chevrons
 
 function spaceforceInsignia(config) {
   const {
-    specialist = 0,   // 0 for E-1, 1-4 for Specialist ranks (stripes above delta)
-    sergeantChevrons = 0, // E-5, E-6
-    orbitalChevrons = 0,  // E-7, E-8, E-9
-    orbitalTier = 0,      // 1=low, 2=medium, 3=geosynch
+    horizontalBars = 0,   // E-2, E-3, E-4 (1, 2, 3 bars) - delta in center
+    downwardChevrons = 0, // E-5+ (3 or 4 chevrons at bottom)
+    rockers = 0,          // E-7+ (1, 2, 3 rockers at top)
+    deltaTop = false,     // E-5+ delta moves to top
+    flankingStars = false, // CMSSF has stars on either side of delta
   } = config;
 
   const color = '#c0c8d0';
-  const dark = '#1a2330';
+  const blue = '#1a3a5c';
 
   let elements = '';
 
-  // Hexagonal border
-  const hex = 'M50,8 L82,26 L82,64 L50,82 L18,64 L18,26 Z';
-  elements += `<path d="${hex}" fill="${dark}" stroke="${color}" stroke-width="1.5"/>`;
+  // Upward-pointing delta arrowhead (larger size)
+  if (deltaTop) {
+    // E-5+: Delta at top
+    const rockerBottomY = 18 + (rockers * 5);
+    const deltaY = rockerBottomY + 4;
+    elements += `<path d="M50,${deltaY} L38,${deltaY+16} L62,${deltaY+16} Z" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
 
-  if (specialist > 0) {
-    // Delta triangle in center
-    elements += `<path d="M50,58 L38,68 L62,68 Z" fill="${color}"/>`;
-
-    // Specialist stripes above delta (dots/small bars)
-    const positions = [
-      [], // 0
-      [[50, 28]], // 1
-      [[44, 28], [56, 28]], // 2
-      [[40, 28], [50, 28], [60, 28]], // 3
-      [[38, 28], [46, 28], [54, 28], [62, 28]] // 4
-    ];
-    (positions[specialist] || []).forEach(([x,y]) => {
-      elements += `<circle cx="${x}" cy="${y}" r="2.5" fill="${color}"/>`;
-    });
-    // Connect line for visual similarity to chevron stripes
-    if (specialist > 1) {
-      const first = positions[specialist][0];
-      const last = positions[specialist][positions[specialist].length-1];
-      elements += `<line x1="${first[0]-3}" y1="${first[1]}" x2="${last[0]+3}" y2="${last[1]}" stroke="${color}" stroke-width="1" opacity="0.4"/>`;
+    // Flanking stars for CMSSF
+    if (flankingStars) {
+      elements += centerStar(32, deltaY + 8, 4, color);
+      elements += centerStar(68, deltaY + 8, 4, color);
     }
-  } else if (sergeantChevrons > 0) {
-    // Chevrons in middle
-    for (let c = 0; c < sergeantChevrons; c++) {
-      const y = 50 + c * 7;
-      elements += `<path d="${chevronPath(y, 4, 34, 50)}" fill="${color}"/>`;
-    }
-    // Small delta above
-    elements += `<path d="M50,30 L44,38 L56,38 Z" fill="${color}"/>`;
-  } else if (orbitalChevrons > 0) {
-    // Orbital curved chevrons (E-7, E-8, E-9)
-    // Delta ascending: position delta higher with more chevrons
-    const deltaY = 50 - orbitalChevrons * 3;
-    elements += `<path d="M50,${deltaY-6} L44,${deltaY+2} L56,${deltaY+2} Z" fill="${color}"/>`;
-    // Globe circle
-    elements += `<circle cx="50" cy="${deltaY+10}" r="5" fill="none" stroke="${color}" stroke-width="1.2"/>`;
-    elements += `<line x1="45" y1="${deltaY+10}" x2="55" y2="${deltaY+10}" stroke="${color}" stroke-width="0.8"/>`;
-    elements += `<line x1="50" y1="${deltaY+5}" x2="50" y2="${deltaY+15}" stroke="${color}" stroke-width="0.8"/>`;
-    // Arcs (orbital chevrons)
-    for (let a = 0; a < orbitalChevrons; a++) {
-      const y = 62 + a * 5;
-      elements += `<path d="M32,${y} Q50,${y+4} 68,${y}" fill="none" stroke="${color}" stroke-width="1.8"/>`;
-    }
+  } else if (horizontalBars > 0) {
+    // E-2 to E-4: Delta in center
+    elements += `<path d="M50,38 L38,54 L62,54 Z" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
   } else {
-    // E-1: just delta in hexagon
-    elements += `<path d="M50,40 L36,62 L64,62 Z" fill="${color}"/>`;
+    // E-1: Just delta in center
+    elements += `<path d="M50,38 L38,54 L62,54 Z" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
+  }
+
+  // Horizontal bars (E-2 to E-4) - centered vertically on delta
+  if (horizontalBars > 0) {
+    const barThickness = 3;
+    const barGap = 1.5;
+    const totalHeight = horizontalBars * barThickness + (horizontalBars - 1) * barGap;
+    let y = 50 - totalHeight / 2;
+
+    for (let i = 0; i < horizontalBars; i++) {
+      // Left bar
+      elements += `<rect x="12" y="${y}" width="26" height="${barThickness}" fill="${color}" stroke="${blue}" stroke-width="0.4"/>`;
+      // Right bar
+      elements += `<rect x="62" y="${y}" width="26" height="${barThickness}" fill="${color}" stroke="${blue}" stroke-width="0.4"/>`;
+      y += barThickness + barGap;
+    }
+  }
+
+  // Top rockers (E-7+) - rainbow oriented (downward arc)
+  if (rockers > 0) {
+    let rockerY = 10;
+    for (let r = 0; r < rockers; r++) {
+      elements += `<path d="${rockerPathInverted(rockerY, 4, 72)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
+      rockerY += 5;
+    }
+  }
+
+  // Downward chevrons at bottom (E-5+)
+  if (downwardChevrons > 0) {
+    let chevY = 70;
+    for (let c = 0; c < downwardChevrons; c++) {
+      elements += `<path d="${chevronPathDown(chevY, 4, 70)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
+      chevY += 6;
+    }
   }
 
   return svg(`
@@ -1437,6 +1527,9 @@ function navyEnlisted(config) {
     stars = 0,         // CPO and above have stars above eagle
     rating = false,    // rating badge (specialty)
     coastguard = false,
+    cpo = false,       // Chief Petty Officer style (3 chevrons + rocker + eagle)
+    middleStar = false, // Command Master Chief has star between chevrons and rocker
+    goldStars = false,  // MCPO-CG has gold stars instead of silver
   } = config;
 
   const bg = coastguard ? '#1a3a4a' : '#1a1a2e';
@@ -1456,33 +1549,50 @@ function navyEnlisted(config) {
     }
   }
 
-  // Chevrons for petty officers
-  if (chevrons > 0) {
+  // Chevrons for petty officers (downward pointing) - NOT for CPO
+  if (chevrons > 0 && stars === 0 && !cpo) {
     const chColor = red;
     for (let c = 0; c < chevrons; c++) {
-      const y = 70 - c * 8;
-      elements += `<path d="${chevronPath(y, 5, 50)}" fill="${chColor}" stroke="#000" stroke-width="0.3"/>`;
+      const y = 50 + c * 8;
+      elements += `<path d="${chevronPathDown(y, 5, 50)}" fill="${chColor}" stroke="#000" stroke-width="0.3"/>`;
     }
     // Rating badge / eagle on top
     if (eagleTop) {
-      elements += eagle(50, 38, 16, gold);
+      elements += eagle(50, 32, 16, gold);
       // Rating placeholder (small bird/crow)
       if (rating) {
-        elements += `<rect x="46" y="44" width="8" height="4" fill="${silver}" rx="1"/>`;
+        elements += `<rect x="46" y="38" width="8" height="4" fill="${silver}" rx="1"/>`;
       }
     }
   }
 
-  // Stars for CPO+
-  if (stars > 0) {
-    for (let i = 0; i < stars; i++) {
-      const offset = (i - (stars-1)/2) * 10;
-      elements += centerStar(50 + offset, 22, 3.5, gold);
+  // Chief Petty Officer design (3 downward chevrons, inverted rocker, eagle, stars)
+  if (cpo || stars > 0) {
+    // 3 downward-pointing chevrons in gold
+    for (let c = 0; c < 3; c++) {
+      const y = 58 + c * 7;
+      elements += `<path d="${chevronPathDown(y, 5, 50)}" fill="${gold}" stroke="#000" stroke-width="0.3"/>`;
+    }
+    // Middle star (Command Master Chief) - between chevrons and rocker
+    if (middleStar) {
+      elements += centerStar(50, 53, 5, silver);
+    }
+    // Inverted rocker (arc above chevrons) in gold
+    elements += `<path d="${rockerPathInverted(48, 5, 55)}" fill="${gold}" stroke="#000" stroke-width="0.3"/>`;
+    // Eagle above rocker in white
+    elements += eagle(50, 34, 16, white);
+    // Stars at top (if any) - silver or gold depending on goldStars parameter
+    if (stars > 0) {
+      const starColor = goldStars ? gold : silver;
+      for (let i = 0; i < stars; i++) {
+        const offset = (i - (stars-1)/2) * 12;
+        elements += centerStar(50 + offset, 18, 5.5, starColor);
+      }
     }
   }
 
   // E-1 has no insignia — render a placeholder
-  if (stripes === 0 && chevrons === 0 && stars === 0) {
+  if (stripes === 0 && chevrons === 0 && stars === 0 && !cpo) {
     elements += `<text x="50" y="54" text-anchor="middle" fill="${silver}" font-family="monospace" font-size="10" opacity="0.6">NO INSIGNIA</text>`;
   }
 
@@ -1595,7 +1705,7 @@ function navyOfficerStripes(config) {
 
   // Star (line officer) or eagle (not drawn, kept generic)
   if (starAbove) {
-    elements += centerStar(50, 20, 5, gold);
+    elements += centerStar(50, 20, 6, gold);
   }
 
   // Sleeve stripes — draw on shoulder board style
@@ -1608,8 +1718,8 @@ function navyOfficerStripes(config) {
     elements += `<rect x="${stripeX}" y="42" width="${stripeW}" height="7" fill="${gold}"/>`;
     // Stars arranged
     for (let i = 0; i < adm; i++) {
-      const offset = (i - (adm-1)/2) * 12;
-      elements += centerStar(50 + offset, 66, 5, gold);
+      const offset = (i - (adm-1)/2) * 13;
+      elements += centerStar(50 + offset, 66, 6, gold);
     }
   } else {
     // Standard officer stripes
@@ -1650,7 +1760,7 @@ function warrantOfficer(config) {
 
   let bg = '#1e2817';
   if (service === 'navy') bg = '#0a1829';
-  if (service === 'marines') bg = '#3a5f0b';
+  if (service === 'marines') bg = '#4b5320';
 
   if (service === 'army' || service === 'airforce') {
     // Army WO: vertical bar with squares
@@ -1666,35 +1776,75 @@ function warrantOfficer(config) {
       // Thin black vertical line down middle
       elements += `<rect x="49" y="${barY+2}" width="2" height="${barH-4}" fill="${black}"/>`;
     } else {
-      // Black squares
+      // Black squares - vertically centered within bar
       const sqSize = 8;
-      const spacing = (barH - 8) / (level);
+      const sqGap = 2;
+      const totalSquaresHeight = level * sqSize + (level - 1) * sqGap;
+      const startY = barY + (barH - totalSquaresHeight) / 2;
       for (let i = 0; i < level; i++) {
-        const sqY = barY + 4 + i * (sqSize + 2);
+        const sqY = startY + i * (sqSize + sqGap);
         elements += `<rect x="${barX+2}" y="${sqY}" width="${sqSize}" height="${sqSize}" fill="${black}"/>`;
       }
     }
   } else if (service === 'navy') {
-    // Navy WO: gold bar with blue breaks (W-2 through W-5)
-    // W-1 no longer used
-    const barX = 40, barY = 22, barW = 20, barH = 56;
-    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${gold}" stroke="#4a3a10" stroke-width="0.5"/>`;
-    // Blue breaks
-    for (let i = 0; i < level - 1; i++) {
-      const breakY = barY + (barH / level) * (i + 1) - 2;
-      elements += `<rect x="${barX}" y="${breakY}" width="${barW}" height="4" fill="${bg}"/>`;
+    // Navy WO: vertical bar system
+    // W-1: one gold bar on blue background
+    // W-2: two gold bars on blue background
+    // W-3: one silver bar on blue background
+    // W-4: two silver bars on blue background
+    // W-5: single blue stripe on gold background
+    const barX = 44, barY = 22, barW = 12, barH = 56;
+
+    if (level === 5) {
+      // W-5: Gold background with blue stripe
+      elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${gold}" stroke="#333" stroke-width="0.5"/>`;
+      elements += `<rect x="49" y="${barY+2}" width="2" height="${barH-4}" fill="${bg}"/>`;
+    } else {
+      // W-1 through W-4: Blue background with bars
+      elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${bg}" stroke="#333" stroke-width="0.5"/>`;
+
+      const barColor = (level === 1 || level === 2) ? gold : silver;
+      const barCount = (level === 1 || level === 3) ? 1 : 2;
+      const barHeight = 12;
+      const barGap = 4;
+      const totalBarsHeight = barCount * barHeight + (barCount - 1) * barGap;
+      const startY = barY + (barH - totalBarsHeight) / 2;
+
+      for (let i = 0; i < barCount; i++) {
+        const y = startY + i * (barHeight + barGap);
+        elements += `<rect x="${barX+2}" y="${y}" width="${barW-4}" height="${barHeight}" fill="${barColor}" stroke="#333" stroke-width="0.3"/>`;
+      }
     }
-    // Specialty insignia at top (placeholder)
-    elements += `<circle cx="50" cy="16" r="5" fill="none" stroke="${silver}" stroke-width="1"/>`;
-    elements += `<path d="M46,16 L54,16 M50,12 L50,20" stroke="${silver}" stroke-width="1"/>`;
   } else if (service === 'marines') {
-    // Marine WO: horizontal bar, red/gold/scarlet stripes
-    const barY = 40, barH = 18, barX = 18, barW = 64;
-    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${silver}" stroke="#333" stroke-width="0.5"/>`;
-    // Red squares based on level
-    for (let i = 0; i < level; i++) {
-      const sqX = barX + 4 + i * 12;
-      elements += `<rect x="${sqX}" y="${barY + 3}" width="8" height="12" fill="${red}"/>`;
+    // Marine WO: vertical bar with red squares
+    // W-1: two red squares (top & bottom), gold bar
+    // W-2: three red squares (top, center, bottom), gold bar
+    // W-3: two red squares (top & bottom), silver bar
+    // W-4: three red squares (top, center, bottom), silver bar
+    // W-5: vertical line, gold bar
+    const barX = 44, barY = 22, barW = 12, barH = 56;
+    const barColor = (level === 1 || level === 2 || level === 5) ? gold : silver;
+    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${barColor}" stroke="#333" stroke-width="0.5"/>`;
+
+    if (level === 5) {
+      // Thin vertical line down middle
+      elements += `<rect x="49" y="${barY+2}" width="2" height="${barH-4}" fill="${red}"/>`;
+    } else {
+      // Red squares
+      const sqSize = 8;
+      const sqW = 8;
+      const squareCount = (level === 1 || level === 3) ? 2 : 3; // W1/W3 = 2 squares, W2/W4 = 3 squares
+
+      if (squareCount === 2) {
+        // Top and bottom
+        elements += `<rect x="${barX+2}" y="${barY+4}" width="${sqW}" height="${sqSize}" fill="${red}"/>`;
+        elements += `<rect x="${barX+2}" y="${barY+barH-sqSize-4}" width="${sqW}" height="${sqSize}" fill="${red}"/>`;
+      } else {
+        // Top, center, bottom
+        elements += `<rect x="${barX+2}" y="${barY+4}" width="${sqW}" height="${sqSize}" fill="${red}"/>`;
+        elements += `<rect x="${barX+2}" y="${barY+(barH-sqSize)/2}" width="${sqW}" height="${sqSize}" fill="${red}"/>`;
+        elements += `<rect x="${barX+2}" y="${barY+barH-sqSize-4}" width="${sqW}" height="${sqSize}" fill="${red}"/>`;
+      }
     }
   }
 
@@ -1737,8 +1887,8 @@ addRank({ id:'army-e4-cpl', grade:'E-4', name:'Corporal', abbr:'CPL', branch:'ar
   svg: armyChevron({chevrons:2}) });
 addRank({ id:'army-e4-spc', grade:'E-4', name:'Specialist', abbr:'SPC', branch:'army', category:'enlisted', tier:4,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
-    <path d="M20,30 Q20,20 30,20 L70,20 Q80,20 80,30 L80,50 Q80,60 70,60 L30,60 Q20,60 20,50 Z" fill="none" stroke="#d4cdb5" stroke-width="1.5"/>
-    ${eagle(50, 42, 18, '#d4cdb5')}`) });
+    <path d="M30,25 L70,25 L75,35 L75,50 L50,70 L25,50 L25,35 Z" fill="none" stroke="#d4cdb5" stroke-width="1.5"/>
+    ${eagle(50, 45, 18, '#d4cdb5')}`) });
 addRank({ id:'army-e5', grade:'E-5', name:'Sergeant', abbr:'SGT', branch:'army', category:'enlisted', tier:5,
   svg: armyChevron({chevrons:3}) });
 addRank({ id:'army-e6', grade:'E-6', name:'Staff Sergeant', abbr:'SSG', branch:'army', category:'enlisted', tier:6,
@@ -1750,15 +1900,17 @@ addRank({ id:'army-e8-msg', grade:'E-8', name:'Master Sergeant', abbr:'MSG', bra
 addRank({ id:'army-e8-1sg', grade:'E-8', name:'First Sergeant', abbr:'1SG', branch:'army', category:'enlisted', tier:8,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${armyChevron({chevrons:3, rockers:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <text x="50" y="48" text-anchor="middle" fill="#d4cdb5" font-family="serif" font-size="12" font-weight="bold" font-style="italic">1</text>`) });
+    <path d="M50,45 L55,50 L50,55 L45,50 Z" fill="#d4cdb5" stroke="#2a2a2a" stroke-width="0.4"/>`) });
 addRank({ id:'army-e9-sgm', grade:'E-9', name:'Sergeant Major', abbr:'SGM', branch:'army', category:'enlisted', tier:9,
   svg: armyChevron({chevrons:3, rockers:3, stars:1}) });
 addRank({ id:'army-e9-csm', grade:'E-9', name:'Command Sergeant Major', abbr:'CSM', branch:'army', category:'enlisted', tier:9,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${armyChevron({chevrons:3, rockers:3, stars:1}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <circle cx="50" cy="40" r="10" fill="none" stroke="#d4cdb5" stroke-width="0.8" opacity="0.6"/>`) });
+    <circle cx="50" cy="50" r="10" fill="none" stroke="#d4cdb5" stroke-width="0.8" opacity="0.6"/>`) });
 addRank({ id:'army-e9-sma', grade:'E-9', name:'Sergeant Major of the Army', abbr:'SMA', branch:'army', category:'enlisted', tier:10,
-  svg: armyChevron({chevrons:3, rockers:3, stars:2}) });
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+    ${armyChevron({chevrons:3, rockers:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    ${eagle(50, 50, 22, '#d4cdb5')}`) });
 
 // ============ ARMY WARRANT ============
 addRank({ id:'army-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'army', category:'warrant', tier:1,
@@ -1798,13 +1950,13 @@ addRank({ id:'army-o11', grade:'Special', name:'General of the Army', abbr:'GA',
 
 // ============ MARINE ENLISTED ============
 addRank({ id:'marines-e1', grade:'E-1', name:'Private', abbr:'Pvt', branch:'marines', category:'enlisted', tier:1,
-  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
 addRank({ id:'marines-e2', grade:'E-2', name:'Private First Class', abbr:'PFC', branch:'marines', category:'enlisted', tier:2,
   svg: marinesChevron({chevrons:1}) });
 addRank({ id:'marines-e3', grade:'E-3', name:'Lance Corporal', abbr:'LCpl', branch:'marines', category:'enlisted', tier:3,
   svg: marinesChevron({chevrons:1, rifles:false, rockers:0, stars:0}) + ''.replace(/./, '') });
 // Lance Corporal has one chevron + crossed rifles
-RANKS[RANKS.length-1].svg = svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+RANKS[RANKS.length-1].svg = svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
   <path d="${chevronPath(48, 7, 70)}" fill="#c41e1e" stroke="#4a0000" stroke-width="0.5"/>
   <g color="#c41e1e">${crossedRifles(50, 62, 10)}</g>`);
 addRank({ id:'marines-e4', grade:'E-4', name:'Corporal', abbr:'Cpl', branch:'marines', category:'enlisted', tier:4,
@@ -1818,14 +1970,13 @@ addRank({ id:'marines-e7', grade:'E-7', name:'Gunnery Sergeant', abbr:'GySgt', b
 addRank({ id:'marines-e8-msgt', grade:'E-8', name:'Master Sergeant', abbr:'MSgt', branch:'marines', category:'enlisted', tier:8,
   svg: marinesChevron({chevrons:3, rockers:3, rifles:true}) });
 addRank({ id:'marines-e8-1sgt', grade:'E-8', name:'First Sergeant', abbr:'1stSgt', branch:'marines', category:'enlisted', tier:8,
-  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${marinesChevron({chevrons:3, rockers:3, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <polygon points="46,42 54,42 50,52" fill="#c41e1e"/>`) });
+    <polygon points="46,51 54,51 50,58" fill="#c41e1e"/>`) });
 addRank({ id:'marines-e9-mgysgt', grade:'E-9', name:'Master Gunnery Sergeant', abbr:'MGySgt', branch:'marines', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${marinesChevron({chevrons:3, rockers:4, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <g color="#c41e1e">${crossedRifles(50, 44, 8)}</g>
-    <circle cx="50" cy="44" r="3" fill="#c41e1e" opacity="0.7"/>`) });
+    ${pineapple(50, 50, 14, '#c41e1e')}`) });
 addRank({ id:'marines-e9-sgtmaj', grade:'E-9', name:'Sergeant Major', abbr:'SgtMaj', branch:'marines', category:'enlisted', tier:9,
   svg: marinesChevron({chevrons:3, rockers:4, stars:1, rifles:false}) });
 addRank({ id:'marines-e9-sgtmajmc', grade:'E-9', name:'Sergeant Major of the Marine Corps', abbr:'SgtMajMC', branch:'marines', category:'enlisted', tier:10,
@@ -1869,27 +2020,31 @@ addRank({ id:'marines-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'ma
 addRank({ id:'af-e1', grade:'E-1', name:'Airman Basic', abbr:'AB', branch:'airforce', category:'enlisted', tier:1,
   svg: svg(`<rect width="100" height="100" fill="#2d3b4d" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
 addRank({ id:'af-e2', grade:'E-2', name:'Airman', abbr:'Amn', branch:'airforce', category:'enlisted', tier:2,
-  svg: airforceChevron({chevrons:1, star:true}) });
+  svg: airforceEnlisted({downwardChevrons:1, star:true}) });
 addRank({ id:'af-e3', grade:'E-3', name:'Airman First Class', abbr:'A1C', branch:'airforce', category:'enlisted', tier:3,
-  svg: airforceChevron({chevrons:2, star:true}) });
+  svg: airforceEnlisted({downwardChevrons:2, star:true}) });
 addRank({ id:'af-e4', grade:'E-4', name:'Senior Airman', abbr:'SrA', branch:'airforce', category:'enlisted', tier:4,
-  svg: airforceChevron({chevrons:3, star:true}) });
+  svg: airforceEnlisted({downwardChevrons:3, star:true}) });
 addRank({ id:'af-e5', grade:'E-5', name:'Staff Sergeant', abbr:'SSgt', branch:'airforce', category:'enlisted', tier:5,
-  svg: airforceChevron({chevrons:4, star:true}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:1, star:true}) });
 addRank({ id:'af-e6', grade:'E-6', name:'Technical Sergeant', abbr:'TSgt', branch:'airforce', category:'enlisted', tier:6,
-  svg: airforceChevron({chevrons:5, star:true}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, star:true}) });
 addRank({ id:'af-e7', grade:'E-7', name:'Master Sergeant', abbr:'MSgt', branch:'airforce', category:'enlisted', tier:7,
-  svg: airforceChevron({chevrons:5, star:true, arcs:1}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:1, star:true}) });
+addRank({ id:'af-e7-1sg', grade:'E-7', name:'First Sergeant', abbr:'1st Sgt', branch:'airforce', category:'enlisted', tier:7,
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:1, star:true, diamond:true}) });
 addRank({ id:'af-e8', grade:'E-8', name:'Senior Master Sergeant', abbr:'SMSgt', branch:'airforce', category:'enlisted', tier:8,
-  svg: airforceChevron({chevrons:5, star:true, arcs:2}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:2, star:true}) });
+addRank({ id:'af-e8-1sg', grade:'E-8', name:'First Sergeant', abbr:'1st Sgt', branch:'airforce', category:'enlisted', tier:8,
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:2, star:true, diamond:true}) });
 addRank({ id:'af-e9', grade:'E-9', name:'Chief Master Sergeant', abbr:'CMSgt', branch:'airforce', category:'enlisted', tier:9,
-  svg: airforceChevron({chevrons:5, star:true, arcs:3}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:3, star:true}) });
+addRank({ id:'af-e9-1sg', grade:'E-9', name:'First Sergeant', abbr:'1st Sgt', branch:'airforce', category:'enlisted', tier:9,
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:3, star:true, diamond:true}) });
 addRank({ id:'af-e9-ccm', grade:'E-9', name:'Command Chief Master Sergeant', abbr:'CCM', branch:'airforce', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#2d3b4d" rx="3"/>
-    ${airforceChevron({chevrons:5, star:true, arcs:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <circle cx="50" cy="56" r="9" fill="none" stroke="#c0c8d0" stroke-width="0.6" opacity="0.6"/>`) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:3, star:true, topStar:true}) });
 addRank({ id:'af-e9-cmsaf', grade:'E-9', name:'Chief Master Sergeant of the Air Force', abbr:'CMSAF', branch:'airforce', category:'enlisted', tier:10,
-  svg: airforceChevron({chevrons:5, star:true, arcs:3, topStar:true}) });
+  svg: airforceEnlisted({downwardChevrons:3, rockers:2, upwardChevrons:3, star:true, seal:true}) });
 
 // ============ AIR FORCE OFFICERS ============ (same insignia as Army)
 addRank({ id:'af-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'airforce', category:'officer', tier:1,
@@ -1927,37 +2082,23 @@ addRank({ id:'navy-e5', grade:'E-5', name:'Petty Officer Second Class', abbr:'PO
 addRank({ id:'navy-e6', grade:'E-6', name:'Petty Officer First Class', abbr:'PO1', branch:'navy', category:'enlisted', tier:6,
   svg: navyEnlisted({chevrons:3, eagleTop:true, rating:true}) });
 addRank({ id:'navy-e7', grade:'E-7', name:'Chief Petty Officer', abbr:'CPO', branch:'navy', category:'enlisted', tier:7,
-  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:0, chevrons:3, eagleTop:false, cpo:true}) });
 addRank({ id:'navy-e8', grade:'E-8', name:'Senior Chief Petty Officer', abbr:'SCPO', branch:'navy', category:'enlisted', tier:8,
-  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    ${centerStar(50, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:1, cpo:true}) });
 addRank({ id:'navy-e9-mcpo', grade:'E-9', name:'Master Chief Petty Officer', abbr:'MCPO', branch:'navy', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    ${centerStar(42, 16, 4, '#d4af37')}${centerStar(58, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:2, cpo:true}) });
 addRank({ id:'navy-e9-formc', grade:'E-9', name:'Fleet/Command Master Chief Petty Officer', abbr:'FORCM/FLTMC', branch:'navy', category:'enlisted', tier:9,
   svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    ${centerStar(38, 16, 4, '#c8cdd4')}${centerStar(50, 16, 4, '#c8cdd4')}${centerStar(62, 16, 4, '#c8cdd4')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+    ${navyEnlisted({stars:2, cpo:true}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    ${centerStar(50, 43, 5.5, '#c8cdd4')}`) });
 addRank({ id:'navy-e9-mcpon', grade:'E-9', name:'Master Chief Petty Officer of the Navy', abbr:'MCPON', branch:'navy', category:'enlisted', tier:10,
   svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    ${centerStar(38, 16, 4, '#d4af37')}${centerStar(50, 16, 4, '#d4af37')}${centerStar(62, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}
-    <text x="50" y="85" text-anchor="middle" fill="#d4af37" font-family="serif" font-size="6">MCPON</text>`) });
+    ${navyEnlisted({stars:3, cpo:true}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '').replace(/#c8cdd4/g, '#d4af37')}
+    <text x="50" y="90" text-anchor="middle" fill="#d4af37" font-family="serif" font-size="6">MCPON</text>`) });
 
-// ============ NAVY WARRANT (W-1 obsolete, W-2 through W-5) ============
+// ============ NAVY WARRANT ============
+addRank({ id:'navy-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'navy', category:'warrant', tier:1,
+  svg: warrantOfficer({level:1, service:'navy'}) });
 addRank({ id:'navy-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CWO2', branch:'navy', category:'warrant', tier:2,
   svg: warrantOfficer({level:2, service:'navy'}) });
 addRank({ id:'navy-w3', grade:'W-3', name:'Chief Warrant Officer 3', abbr:'CWO3', branch:'navy', category:'warrant', tier:3,
@@ -1969,27 +2110,27 @@ addRank({ id:'navy-w5', grade:'W-5', name:'Chief Warrant Officer 5', abbr:'CWO5'
 
 // ============ NAVY OFFICERS ============
 addRank({ id:'navy-o1', grade:'O-1', name:'Ensign', abbr:'ENS', branch:'navy', category:'officer', tier:1,
-  svg: navyOfficerStripes({thickStripes:1, mediumStripes:0}) });
+  svg: officerPin({bars:1, barColor:'gold', navyStyle:true}) });
 addRank({ id:'navy-o2', grade:'O-2', name:'Lieutenant Junior Grade', abbr:'LTJG', branch:'navy', category:'officer', tier:2,
-  svg: navyOfficerStripes({thickStripes:1, mediumStripes:1}) });
+  svg: officerPin({bars:1, barColor:'silver', navyStyle:true}) });
 addRank({ id:'navy-o3', grade:'O-3', name:'Lieutenant', abbr:'LT', branch:'navy', category:'officer', tier:3,
-  svg: navyOfficerStripes({thickStripes:2, mediumStripes:0}) });
+  svg: officerPin({bars:2, barColor:'silver', navyStyle:true}) });
 addRank({ id:'navy-o4', grade:'O-4', name:'Lieutenant Commander', abbr:'LCDR', branch:'navy', category:'officer', tier:4,
-  svg: navyOfficerStripes({thickStripes:2, mediumStripes:1}) });
+  svg: officerPin({oakLeaves:1, leafColor:'gold', navyStyle:true}) });
 addRank({ id:'navy-o5', grade:'O-5', name:'Commander', abbr:'CDR', branch:'navy', category:'officer', tier:5,
-  svg: navyOfficerStripes({thickStripes:3, mediumStripes:0}) });
+  svg: officerPin({oakLeaves:1, leafColor:'silver', navyStyle:true}) });
 addRank({ id:'navy-o6', grade:'O-6', name:'Captain', abbr:'CAPT', branch:'navy', category:'officer', tier:6,
-  svg: navyOfficerStripes({thickStripes:4, mediumStripes:0}) });
+  svg: officerPin({eagle:true, navyStyle:true}) });
 addRank({ id:'navy-o7', grade:'O-7', name:'Rear Admiral (Lower Half)', abbr:'RDML', branch:'navy', category:'officer', tier:7,
-  svg: navyOfficerStripes({adm:1}) });
+  svg: officerPin({stars:1, navyStyle:true}) });
 addRank({ id:'navy-o8', grade:'O-8', name:'Rear Admiral (Upper Half)', abbr:'RADM', branch:'navy', category:'officer', tier:8,
-  svg: navyOfficerStripes({adm:2}) });
+  svg: officerPin({stars:2, navyStyle:true}) });
 addRank({ id:'navy-o9', grade:'O-9', name:'Vice Admiral', abbr:'VADM', branch:'navy', category:'officer', tier:9,
-  svg: navyOfficerStripes({adm:3}) });
+  svg: officerPin({stars:3, navyStyle:true}) });
 addRank({ id:'navy-o10', grade:'O-10', name:'Admiral', abbr:'ADM', branch:'navy', category:'officer', tier:10,
-  svg: navyOfficerStripes({adm:4}) });
+  svg: officerPin({stars:4, navyStyle:true}) });
 addRank({ id:'navy-o11', grade:'Special', name:'Fleet Admiral', abbr:'FADM', branch:'navy', category:'officer', tier:11,
-  svg: navyOfficerStripes({adm:5}) });
+  svg: officerPin({stars:5, navyStyle:true}) });
 
 // ============ COAST GUARD ENLISTED ============
 addRank({ id:'cg-e1', grade:'E-1', name:'Seaman Recruit', abbr:'SR', branch:'coastguard', category:'enlisted', tier:1,
@@ -2005,34 +2146,15 @@ addRank({ id:'cg-e5', grade:'E-5', name:'Petty Officer Second Class', abbr:'PO2'
 addRank({ id:'cg-e6', grade:'E-6', name:'Petty Officer First Class', abbr:'PO1', branch:'coastguard', category:'enlisted', tier:6,
   svg: navyEnlisted({chevrons:3, eagleTop:true, rating:true, coastguard:true}) });
 addRank({ id:'cg-e7', grade:'E-7', name:'Chief Petty Officer', abbr:'CPO', branch:'coastguard', category:'enlisted', tier:7,
-  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:0, cpo:true, coastguard:true}) });
 addRank({ id:'cg-e8', grade:'E-8', name:'Senior Chief Petty Officer', abbr:'SCPO', branch:'coastguard', category:'enlisted', tier:8,
-  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
-    ${centerStar(50, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:1, cpo:true, coastguard:true}) });
 addRank({ id:'cg-e9-mcpo', grade:'E-9', name:'Master Chief Petty Officer', abbr:'MCPO', branch:'coastguard', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
-    ${centerStar(42, 16, 4, '#d4af37')}${centerStar(58, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:2, cpo:true, coastguard:true}) });
 addRank({ id:'cg-e9-cmc', grade:'E-9', name:'Command Master Chief', abbr:'CMC', branch:'coastguard', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
-    ${centerStar(42, 16, 4, '#c8cdd4')}${centerStar(58, 16, 4, '#c8cdd4')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:2, cpo:true, coastguard:true, middleStar:true}) });
 addRank({ id:'cg-e9-mcpocg', grade:'E-9', name:'Master Chief Petty Officer of the Coast Guard', abbr:'MCPO-CG', branch:'coastguard', category:'enlisted', tier:10,
-  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
-    ${centerStar(38, 16, 4, '#d4af37')}${centerStar(50, 16, 4, '#d4af37')}${centerStar(62, 16, 4, '#d4af37')}
-    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
-    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
-    ${eagle(50, 40, 18, '#d4af37')}`) });
+  svg: navyEnlisted({stars:3, cpo:true, coastguard:true, goldStars:true}) });
 
 // ============ COAST GUARD WARRANT ============
 addRank({ id:'cg-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CWO2', branch:'coastguard', category:'warrant', tier:2,
@@ -2044,54 +2166,47 @@ addRank({ id:'cg-w4', grade:'W-4', name:'Chief Warrant Officer 4', abbr:'CWO4', 
 
 // ============ COAST GUARD OFFICERS (same structure as Navy) ============
 addRank({ id:'cg-o1', grade:'O-1', name:'Ensign', abbr:'ENS', branch:'coastguard', category:'officer', tier:1,
-  svg: navyOfficerStripes({thickStripes:1, mediumStripes:0, coastguard:true}) });
+  svg: officerPin({bars:1, barColor:'gold', navyStyle:true}) });
 addRank({ id:'cg-o2', grade:'O-2', name:'Lieutenant Junior Grade', abbr:'LTJG', branch:'coastguard', category:'officer', tier:2,
-  svg: navyOfficerStripes({thickStripes:1, mediumStripes:1, coastguard:true}) });
+  svg: officerPin({bars:1, barColor:'silver', navyStyle:true}) });
 addRank({ id:'cg-o3', grade:'O-3', name:'Lieutenant', abbr:'LT', branch:'coastguard', category:'officer', tier:3,
-  svg: navyOfficerStripes({thickStripes:2, mediumStripes:0, coastguard:true}) });
+  svg: officerPin({bars:2, barColor:'silver', navyStyle:true}) });
 addRank({ id:'cg-o4', grade:'O-4', name:'Lieutenant Commander', abbr:'LCDR', branch:'coastguard', category:'officer', tier:4,
-  svg: navyOfficerStripes({thickStripes:2, mediumStripes:1, coastguard:true}) });
+  svg: officerPin({oakLeaves:1, leafColor:'gold', navyStyle:true}) });
 addRank({ id:'cg-o5', grade:'O-5', name:'Commander', abbr:'CDR', branch:'coastguard', category:'officer', tier:5,
-  svg: navyOfficerStripes({thickStripes:3, mediumStripes:0, coastguard:true}) });
+  svg: officerPin({oakLeaves:1, leafColor:'silver', navyStyle:true}) });
 addRank({ id:'cg-o6', grade:'O-6', name:'Captain', abbr:'CAPT', branch:'coastguard', category:'officer', tier:6,
-  svg: navyOfficerStripes({thickStripes:4, mediumStripes:0, coastguard:true}) });
+  svg: officerPin({eagle:true, navyStyle:true}) });
 addRank({ id:'cg-o7', grade:'O-7', name:'Rear Admiral (Lower Half)', abbr:'RDML', branch:'coastguard', category:'officer', tier:7,
-  svg: navyOfficerStripes({adm:1, coastguard:true}) });
+  svg: officerPin({stars:1, navyStyle:true}) });
 addRank({ id:'cg-o8', grade:'O-8', name:'Rear Admiral (Upper Half)', abbr:'RADM', branch:'coastguard', category:'officer', tier:8,
-  svg: navyOfficerStripes({adm:2, coastguard:true}) });
+  svg: officerPin({stars:2, navyStyle:true}) });
 addRank({ id:'cg-o9', grade:'O-9', name:'Vice Admiral', abbr:'VADM', branch:'coastguard', category:'officer', tier:9,
-  svg: navyOfficerStripes({adm:3, coastguard:true}) });
+  svg: officerPin({stars:3, navyStyle:true}) });
 addRank({ id:'cg-o10', grade:'O-10', name:'Admiral', abbr:'ADM', branch:'coastguard', category:'officer', tier:10,
-  svg: navyOfficerStripes({adm:4, coastguard:true}) });
+  svg: officerPin({stars:4, navyStyle:true}) });
 
 // ============ SPACE FORCE ENLISTED ============
 addRank({ id:'sf-e1', grade:'E-1', name:'Specialist 1', abbr:'Spc1', branch:'spaceforce', category:'enlisted', tier:1,
-  svg: spaceforceInsignia({specialist:0}) });
+  svg: spaceforceInsignia({}) });
 addRank({ id:'sf-e2', grade:'E-2', name:'Specialist 2', abbr:'Spc2', branch:'spaceforce', category:'enlisted', tier:2,
-  svg: spaceforceInsignia({specialist:2}) });
+  svg: spaceforceInsignia({horizontalBars:1}) });
 addRank({ id:'sf-e3', grade:'E-3', name:'Specialist 3', abbr:'Spc3', branch:'spaceforce', category:'enlisted', tier:3,
-  svg: spaceforceInsignia({specialist:3}) });
+  svg: spaceforceInsignia({horizontalBars:2}) });
 addRank({ id:'sf-e4', grade:'E-4', name:'Specialist 4', abbr:'Spc4', branch:'spaceforce', category:'enlisted', tier:4,
-  svg: spaceforceInsignia({specialist:4}) });
+  svg: spaceforceInsignia({horizontalBars:3}) });
 addRank({ id:'sf-e5', grade:'E-5', name:'Sergeant', abbr:'Sgt', branch:'spaceforce', category:'enlisted', tier:5,
-  svg: spaceforceInsignia({sergeantChevrons:1}) });
+  svg: spaceforceInsignia({downwardChevrons:3, deltaTop:true}) });
 addRank({ id:'sf-e6', grade:'E-6', name:'Technical Sergeant', abbr:'TSgt', branch:'spaceforce', category:'enlisted', tier:6,
-  svg: spaceforceInsignia({sergeantChevrons:2}) });
+  svg: spaceforceInsignia({downwardChevrons:4, deltaTop:true}) });
 addRank({ id:'sf-e7', grade:'E-7', name:'Master Sergeant', abbr:'MSgt', branch:'spaceforce', category:'enlisted', tier:7,
-  svg: spaceforceInsignia({orbitalChevrons:1, orbitalTier:1}) });
+  svg: spaceforceInsignia({downwardChevrons:3, rockers:1, deltaTop:true}) });
 addRank({ id:'sf-e8', grade:'E-8', name:'Senior Master Sergeant', abbr:'SMSgt', branch:'spaceforce', category:'enlisted', tier:8,
-  svg: spaceforceInsignia({orbitalChevrons:2, orbitalTier:2}) });
+  svg: spaceforceInsignia({downwardChevrons:3, rockers:2, deltaTop:true}) });
 addRank({ id:'sf-e9', grade:'E-9', name:'Chief Master Sergeant', abbr:'CMSgt', branch:'spaceforce', category:'enlisted', tier:9,
-  svg: spaceforceInsignia({orbitalChevrons:3, orbitalTier:3}) });
+  svg: spaceforceInsignia({downwardChevrons:3, rockers:3, deltaTop:true}) });
 addRank({ id:'sf-e9-cmsssf', grade:'E-9', name:'Chief Master Sergeant of the Space Force', abbr:'CMSSF', branch:'spaceforce', category:'enlisted', tier:10,
-  svg: svg(`<rect width="100" height="100" fill="#1a1f2e" rx="3"/>
-    <path d="M50,6 L82,24 L82,62 L50,80 L18,62 L18,24 Z" fill="#1a2330" stroke="#c0c8d0" stroke-width="1.5"/>
-    <path d="M50,30 L44,38 L56,38 Z" fill="#c0c8d0"/>
-    <circle cx="50" cy="48" r="5" fill="none" stroke="#c0c8d0" stroke-width="1.2"/>
-    <path d="M32,60 Q50,64 68,60" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
-    <path d="M32,66 Q50,70 68,66" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
-    <path d="M32,72 Q50,76 68,72" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
-    ${centerStar(50, 18, 3, '#d4af37')}`) });
+  svg: spaceforceInsignia({downwardChevrons:3, rockers:3, deltaTop:true, flankingStars:true}) });
 
 // ============ SPACE FORCE OFFICERS ============ (same as Air Force)
 addRank({ id:'sf-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'spaceforce', category:'officer', tier:1,
