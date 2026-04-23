@@ -1,0 +1,2818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2d3420">
+<title>Rank &amp; File — US Armed Forces Rank Study</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232d3420'/%3E%3Cpath d='M20 70 L50 30 L80 70 Z' fill='%23c9a961' stroke='%23f4ead5' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+/* ============================================
+   RANK & FILE — Field Manual meets Study Tool
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --bg: #1a1f14;
+  --bg-elev: #242b1b;
+  --bg-card: #2d3420;
+  --bg-card-hover: #363e27;
+  --border: #3d4630;
+  --border-strong: #556040;
+  --text: #e8e4d3;
+  --text-dim: #9ca088;
+  --text-faint: #6b7058;
+  --accent: #c9a961;
+  --accent-bright: #e5c47a;
+  --stripe: #f4ead5;
+  --danger: #c85a3b;
+  --success: #7ba05b;
+  --warn: #e5a63a;
+
+  /* Branch colors */
+  --army: #4b5320;
+  --navy: #1a3a5c;
+  --marines: #8b1c1c;
+  --airforce: #4a6b8a;
+  --coastguard: #1f4e5c;
+  --spaceforce: #2a2d3e;
+
+  --army-accent: #8a9a5b;
+  --navy-accent: #d4af37;
+  --marines-accent: #d4af37;
+  --airforce-accent: #c0c8d0;
+  --coastguard-accent: #e06c1e;
+  --spaceforce-accent: #7a8baf;
+
+  --shadow: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-strong: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top, #2a3122 0%, transparent 60%),
+    linear-gradient(180deg, #1a1f14 0%, #15180f 100%);
+  background-attachment: fixed;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Subtle grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+button, input, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+}
+
+/* ============================================
+   APP SHELL
+   ============================================ */
+
+#app {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+  padding-top: env(safe-area-inset-top);
+}
+
+header.app-header {
+  padding: 20px 0 16px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, var(--bg) 85%, transparent);
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.brand .title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--stripe);
+  text-transform: uppercase;
+}
+
+.brand .sub {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: var(--accent);
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Tab bar */
+nav.tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: 14px;
+  background: var(--bg-elev);
+  padding: 3px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+
+nav.tabs button {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-radius: 1px;
+  transition: all 0.15s ease;
+}
+
+nav.tabs button.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+nav.tabs button:not(.active):hover {
+  color: var(--text);
+  background: var(--bg-card);
+}
+
+/* ============================================
+   VIEWS
+   ============================================ */
+
+.view { display: none; animation: fadeIn 0.25s ease; }
+.view.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   SETUP / FILTERS VIEW
+   ============================================ */
+
+.section-heading {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 24px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-heading::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%);
+}
+
+.branches-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 600px) {
+  .branches-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.branch-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.branch-toggle.on {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.branch-toggle .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.branch-toggle.on .dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.options-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.opt-card {
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  text-align: left;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opt-card.on {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.opt-card .opt-label {
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.2em;
+}
+
+.opt-card .opt-val {
+  font-size: 14px;
+  color: var(--stripe);
+  font-weight: 600;
+}
+
+.opt-card.on .opt-val { color: var(--accent-bright); }
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  margin-bottom: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.toggle-row .label-text { color: var(--text); }
+.toggle-row .hint { font-size: 10px; color: var(--text-faint); letter-spacing: 0.15em; margin-top: 2px; font-family: 'JetBrains Mono', monospace; text-transform: none; }
+
+.switch {
+  width: 40px;
+  height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: var(--text);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.switch.on { background: var(--accent); }
+.switch.on::after { transform: translateX(18px); background: var(--bg); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 10px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+.stat-box .stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  line-height: 1;
+}
+
+.stat-box .stat-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+.start-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-top: 20px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: var(--accent-bright);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-strong);
+}
+
+.start-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.start-btn::before {
+  content: '▸';
+  margin-right: 10px;
+  display: inline-block;
+}
+
+/* ============================================
+   FLASH CARD VIEW
+   ============================================ */
+
+.card-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-elev);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-bright) 100%);
+  transition: width 0.3s ease;
+}
+
+.flashcard-wrap {
+  perspective: 1800px;
+  min-height: 440px;
+  margin-bottom: 14px;
+  touch-action: pan-y;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  min-height: 440px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+  cursor: pointer;
+}
+
+.flashcard.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-strong);
+  overflow: hidden;
+}
+
+.card-face.back { transform: rotateY(180deg); }
+
+/* Stamped corner marks — field manual feel */
+.card-face::before,
+.card-face::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--accent);
+  opacity: 0.5;
+}
+
+.card-face::before {
+  top: 8px;
+  left: 8px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.card-face::after {
+  bottom: 8px;
+  right: 8px;
+  border-left: none;
+  border-top: none;
+}
+
+.card-branch-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--branch-color, var(--accent));
+}
+
+.card-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.card-prompt {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.insignia-container {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.insignia-container svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.rank-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  color: var(--stripe);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.rank-abbr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.branch-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border: 1px solid var(--branch-color, var(--border));
+  border-radius: 2px;
+  margin-top: 10px;
+  background: rgba(0,0,0,0.2);
+}
+
+.paygrade-big {
+  font-family: 'Oswald', sans-serif;
+  font-size: 96px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 10px 0 4px;
+  text-shadow: 0 0 40px rgba(201, 169, 97, 0.3);
+}
+
+.paygrade-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.card-tier {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.2em;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.flip-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Rating buttons */
+.rating-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.rate-btn {
+  padding: 14px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.rate-btn .rate-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.rate-btn.bad { border-color: var(--danger); color: var(--danger); }
+.rate-btn.bad:hover { background: var(--danger); color: var(--bg); }
+
+.rate-btn.ok { border-color: var(--warn); color: var(--warn); }
+.rate-btn.ok:hover { background: var(--warn); color: var(--bg); }
+
+.rate-btn.good { border-color: var(--success); color: var(--success); }
+.rate-btn.good:hover { background: var(--success); color: var(--bg); }
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.action-btn {
+  padding: 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn:hover { color: var(--text); border-color: var(--border-strong); }
+.action-btn.active { color: var(--accent); border-color: var(--accent); }
+.action-btn.star.starred { color: var(--accent-bright); border-color: var(--accent-bright); }
+
+/* ============================================
+   REFERENCE VIEW
+   ============================================ */
+
+.ref-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ref-pill {
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ref-pill.on {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.ref-branch {
+  margin-bottom: 28px;
+}
+
+.ref-branch-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stripe);
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--branch-color, var(--accent));
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.ref-branch-title .cat-label {
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.25em;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ref-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ref-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.ref-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+}
+
+.ref-card .ref-insignia {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.ref-card .ref-insignia svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.ref-card .ref-grade {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.ref-card .ref-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.ref-card .ref-abbr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   RESULT / COMPLETE VIEW
+   ============================================ */
+
+.complete-view {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.complete-view h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  margin-bottom: 10px;
+}
+
+.complete-view .subtitle {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-bottom: 30px;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.result-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px 10px;
+  border-radius: 2px;
+}
+
+.result-stat .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.result-stat .lbl {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+.result-stat.good .num { color: var(--success); }
+.result-stat.bad .num { color: var(--danger); }
+
+/* ============================================
+   TOAST
+   ============================================ */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  padding: 10px 20px;
+  border-radius: 2px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  box-shadow: var(--shadow-strong);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+
+.row { display: flex; gap: 8px; }
+.hidden { display: none !important; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* iOS safe area */
+@supports (padding: env(safe-area-inset-bottom)) {
+  #app { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="app-header">
+    <div class="brand">
+      <span class="title">Rank &amp; File</span>
+      <span class="sub">FM-STUDY / v1.0</span>
+    </div>
+    <nav class="tabs">
+      <button id="tab-study" class="active" data-view="setup">Study</button>
+      <button id="tab-reference" data-view="reference">Reference</button>
+      <button id="tab-stats" data-view="stats">Progress</button>
+    </nav>
+  </header>
+
+  <!-- SETUP VIEW -->
+  <section id="view-setup" class="view active">
+    <div class="section-heading">Branches</div>
+    <div id="branches-grid" class="branches-grid"></div>
+
+    <div class="section-heading">Categories</div>
+    <div id="categories-grid" class="branches-grid"></div>
+
+    <div class="section-heading">Mode</div>
+    <div class="options-row">
+      <button class="opt-card" data-mode="insignia">
+        <span class="opt-label">Show Insignia</span>
+        <span class="opt-val">→ Name the Rank</span>
+      </button>
+      <button class="opt-card" data-mode="rank">
+        <span class="opt-label">Show Rank</span>
+        <span class="opt-val">→ Give the Grade</span>
+      </button>
+      <button class="opt-card" data-mode="mixed">
+        <span class="opt-label">Mixed</span>
+        <span class="opt-val">→ Both Directions</span>
+      </button>
+      <button class="opt-card" data-mode="quiz">
+        <span class="opt-label">Multiple Choice</span>
+        <span class="opt-val">→ 4-Option Quiz</span>
+      </button>
+    </div>
+
+    <div class="section-heading">Options</div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label-text">Shuffle Order</div>
+        <div class="hint">randomize card sequence</div>
+      </div>
+      <div class="switch on" id="toggle-shuffle"></div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label-text">Starred Only</div>
+        <div class="hint"><span id="starred-count">0</span> cards marked</div>
+      </div>
+      <div class="switch" id="toggle-starred"></div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label-text">Spaced Repetition</div>
+        <div class="hint">prioritize weak cards (Leitner)</div>
+      </div>
+      <div class="switch on" id="toggle-leitner"></div>
+    </div>
+
+    <div class="section-heading">Session</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num" id="setup-count">0</div>
+        <div class="stat-label">Cards</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="setup-mastered">0</div>
+        <div class="stat-label">Mastered</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="setup-weak">0</div>
+        <div class="stat-label">Weak</div>
+      </div>
+    </div>
+
+    <button id="start-session" class="start-btn">Begin Session</button>
+  </section>
+
+  <!-- CARD VIEW -->
+  <section id="view-card" class="view">
+    <div class="card-progress">
+      <span id="card-counter">1 / 20</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <button id="end-session" style="font-family: 'Oswald', sans-serif; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); padding: 4px;">End</button>
+    </div>
+
+    <div class="flashcard-wrap">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face front" id="card-front"></div>
+        <div class="card-face back" id="card-back"></div>
+      </div>
+    </div>
+
+    <div id="rating-row" class="rating-row hidden">
+      <button class="rate-btn bad" data-rate="0">
+        <span class="rate-icon">✕</span>
+        <span>Missed</span>
+      </button>
+      <button class="rate-btn ok" data-rate="1">
+        <span class="rate-icon">~</span>
+        <span>Close</span>
+      </button>
+      <button class="rate-btn good" data-rate="2">
+        <span class="rate-icon">✓</span>
+        <span>Got It</span>
+      </button>
+    </div>
+
+    <div id="quiz-choices" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;"></div>
+
+    <div class="card-actions">
+      <button class="action-btn" id="btn-flip">
+        <span>Flip</span>
+      </button>
+      <button class="action-btn star" id="btn-star">
+        <span id="star-icon">☆</span>
+        <span>Star</span>
+      </button>
+      <button class="action-btn" id="btn-skip">
+        <span>Skip →</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- COMPLETE VIEW -->
+  <section id="view-complete" class="view">
+    <div class="complete-view">
+      <h2>Session Complete</h2>
+      <p class="subtitle">Your progress has been saved.</p>
+      <div class="result-stats">
+        <div class="result-stat good">
+          <div class="num" id="result-good">0</div>
+          <div class="lbl">Correct</div>
+        </div>
+        <div class="result-stat">
+          <div class="num" id="result-ok">0</div>
+          <div class="lbl">Close</div>
+        </div>
+        <div class="result-stat bad">
+          <div class="num" id="result-bad">0</div>
+          <div class="lbl">Missed</div>
+        </div>
+      </div>
+      <button id="restart-btn" class="start-btn">New Session</button>
+    </div>
+  </section>
+
+  <!-- REFERENCE VIEW -->
+  <section id="view-reference" class="view">
+    <div class="section-heading">Filter</div>
+    <div class="ref-filters" id="ref-filters"></div>
+    <div id="reference-content"></div>
+  </section>
+
+  <!-- STATS VIEW -->
+  <section id="view-stats" class="view">
+    <div class="section-heading">Overall Progress</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-seen">0</div>
+        <div class="stat-label">Studied</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-sessions">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Answers</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Mastery by Box</div>
+    <div id="leitner-boxes"></div>
+
+    <div class="section-heading">Weakest Cards</div>
+    <div id="weak-list"></div>
+
+    <div class="section-heading" style="color: var(--danger);">Danger Zone</div>
+    <button id="reset-progress" class="action-btn" style="width: 100%; padding: 14px; border-color: var(--danger); color: var(--danger);">Reset All Progress</button>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================================
+   INSIGNIA SVG LIBRARY
+   ============================================================================
+   All insignia rendered inline as SVG. Based on official US DoD rank patterns.
+   Stylized/schematic representations, not pixel-perfect reproductions.
+   ============================================================================ */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// Build reusable primitive shapes
+function svg(content, viewBox='0 0 100 100') {
+  return `<svg xmlns="${SVG_NS}" viewBox="${viewBox}" width="100%" height="100%">${content}</svg>`;
+}
+
+// ============ CHEVRONS (Army/Marines/AF/USSF style) ============
+// Stacked V shapes, optionally with rockers (arcs below) and center devices
+
+function chevronPath(y, thickness=8, width=70, cx=50) {
+  const half = width/2;
+  const x1 = cx - half, x2 = cx + half;
+  const vy = y;
+  const peakY = y - half * 0.55;
+  return `M${x1},${vy} L${cx},${peakY} L${x2},${vy} L${x2},${vy+thickness} L${cx},${peakY+thickness} L${x1},${vy+thickness} Z`;
+}
+
+function rockerPath(y, thickness=7, width=80, cx=50) {
+  // Curved rocker (arc)
+  const half = width/2;
+  const x1 = cx - half, x2 = cx + half;
+  const arcR = width * 0.9;
+  return `M${x1},${y} A${arcR},${arcR} 0 0 0 ${x2},${y} L${x2},${y+thickness} A${arcR-thickness},${arcR-thickness} 0 0 1 ${x1},${y+thickness} Z`;
+}
+
+function crossedRifles(cx=50, cy=50, size=18) {
+  return `<g transform="translate(${cx},${cy})">
+    <line x1="-${size}" y1="-${size}" x2="${size}" y2="${size}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="-${size}" y1="${size}" x2="${size}" y2="-${size}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="-${size*0.75}" cy="-${size*0.75}" r="1.6" fill="currentColor"/>
+    <circle cx="${size*0.75}" cy="-${size*0.75}" r="1.6" fill="currentColor"/>
+  </g>`;
+}
+
+function centerStar(cx=50, cy=50, r=7, fill='currentColor') {
+  let pts = '';
+  for (let i = 0; i < 10; i++) {
+    const angle = (i * Math.PI) / 5 - Math.PI / 2;
+    const rr = i % 2 === 0 ? r : r * 0.4;
+    pts += `${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)} `;
+  }
+  return `<polygon points="${pts.trim()}" fill="${fill}"/>`;
+}
+
+function oakLeaf(cx=50, cy=50, size=18, fill='currentColor') {
+  // Stylized oak leaf silhouette
+  return `<g transform="translate(${cx},${cy}) scale(${size/20})">
+    <path d="M0,-10 C3,-9 5,-6 4,-3 C7,-4 9,-1 8,2 C10,3 10,7 7,8 C5,10 2,9 0,7 C-2,9 -5,10 -7,8 C-10,7 -10,3 -8,2 C-9,-1 -7,-4 -4,-3 C-5,-6 -3,-9 0,-10 Z"
+      fill="${fill}" stroke="#000" stroke-width="0.3" opacity="0.95"/>
+  </g>`;
+}
+
+function eagle(cx=50, cy=50, size=20, fill='#d4cdb5') {
+  // Highly stylized eagle silhouette (spread wings)
+  return `<g transform="translate(${cx},${cy}) scale(${size/22})">
+    <path d="M0,-3 L-2,-5 L-2,-2 L-12,0 L-10,2 L-4,2 L-6,6 L-2,4 L-2,7 L0,8 L2,7 L2,4 L6,6 L4,2 L10,2 L12,0 L2,-2 L2,-5 Z"
+      fill="${fill}" stroke="#000" stroke-width="0.3"/>
+    <circle cx="0" cy="-4" r="1" fill="${fill}" stroke="#000" stroke-width="0.3"/>
+  </g>`;
+}
+
+// ============ ARMY STYLE ============
+// Olive drab chevrons on green field
+
+function armyChevron(config) {
+  const {
+    chevrons = 0,    // number of chevrons
+    rockers = 0,     // number of rockers below
+    topRocker = 0,   // rockers above (arched over chevrons, for E9)
+    center = null,   // 'star' | 'wreath-star' | 'wreath-stars' | n stars
+    stars = 0,       // center stars
+    wreath = false,  // laurel wreath around center
+  } = config;
+
+  let elements = '';
+  const color = '#d4cdb5';  // light silver/gold
+
+  // Top rockers (E-9 Sergeant Major has 1 arched top "rocker"/star halo, actually stars on sides)
+  // In reality E9 has a star between chevrons. We handle via center.
+
+  // Bottom rockers (below chevrons)
+  for (let r = 0; r < rockers; r++) {
+    const y = 64 + r * 9;
+    elements += `<path d="${rockerPath(y, 6, 76)}" fill="${color}" stroke="#2a2a2a" stroke-width="0.4"/>`;
+  }
+
+  // Chevrons (stacked upward) - start lower and more compact
+  // Bottom chevron is at y=58, each subsequent one goes up by 8
+  const chevBaseY = rockers > 0 ? 55 - rockers * 2 : 60;
+  for (let c = 0; c < chevrons; c++) {
+    const y = chevBaseY - c * 9;
+    elements += `<path d="${chevronPath(y, 6, 60 + c * 5)}" fill="${color}" stroke="#2a2a2a" stroke-width="0.4"/>`;
+  }
+
+  // Center device
+  if (stars > 0) {
+    if (stars === 1) {
+      elements += centerStar(50, 40, 5, color);
+    } else if (stars === 2) {
+      elements += centerStar(42, 40, 4.5, color);
+      elements += centerStar(58, 40, 4.5, color);
+    } else if (stars === 3) {
+      elements += centerStar(40, 40, 4, color);
+      elements += centerStar(50, 40, 4, color);
+      elements += centerStar(60, 40, 4, color);
+    }
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="#4b5320" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ MARINES STYLE ============
+// Red chevrons on green, crossed rifles in lower inverse chevrons
+
+function marinesChevron(config) {
+  const {
+    chevrons = 0,
+    rockers = 0,
+    rifles = false,  // Cpl and above have crossed rifles
+    stars = 0,
+    bursting = false, // Sergeant Major of Marine Corps has eagle/globe/anchor
+  } = config;
+
+  let elements = '';
+  const color = '#c41e1e';  // Marine red
+  const stroke = '#4a0000';
+
+  for (let r = 0; r < rockers; r++) {
+    const y = 66 + r * 9;
+    elements += `<path d="${rockerPath(y, 6, 78)}" fill="${color}" stroke="${stroke}" stroke-width="0.5"/>`;
+  }
+
+  const chevBaseY = rockers > 0 ? 54 - rockers * 2 : 60;
+  for (let c = 0; c < chevrons; c++) {
+    const y = chevBaseY - c * 9;
+    elements += `<path d="${chevronPath(y, 6, 60 + c * 5)}" fill="${color}" stroke="${stroke}" stroke-width="0.5"/>`;
+  }
+
+  if (rifles && chevrons >= 2) {
+    elements += `<g color="${color}">${crossedRifles(50, 72, 10)}</g>`;
+  }
+
+  if (stars > 0) {
+    for (let i = 0; i < stars; i++) {
+      const offset = (i - (stars-1)/2) * 11;
+      elements += centerStar(50 + offset, 40, 4.5, color);
+    }
+  }
+
+  if (bursting) {
+    // Eagle Globe Anchor simplified
+    elements += `<circle cx="50" cy="44" r="9" fill="none" stroke="${color}" stroke-width="1.8"/>`;
+    elements += `<path d="M44,48 Q50,42 56,48" fill="none" stroke="${color}" stroke-width="1.5"/>`;
+    elements += eagle(50, 38, 14, color);
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ AIR FORCE / SPACE FORCE STYLE ============
+// Chevrons with upward points, star in middle, single/double arc rockers
+
+function airforceChevron(config) {
+  const {
+    chevrons = 0,    // top stripes (inverted V, points up)
+    arcs = 0,        // arc lines below star
+    star = false,    // center 5-point star
+    topStar = false, // star above (Chief Master of AF)
+    doubleStar = false,
+  } = config;
+
+  let elements = '';
+  const color = '#c0c8d0';   // silver
+  const stroke = '#3a4a5a';
+
+  // Air force: chevrons point UPWARD, like inverted V stacks
+  // Top chevrons (outer to inner, smaller)
+  for (let c = 0; c < chevrons; c++) {
+    const y = 22 + c * 9;
+    const w = 76 - c * 8;
+    elements += `<path d="${chevronPath(y, 6, w)}" fill="${color}" stroke="${stroke}" stroke-width="0.4"/>`;
+  }
+
+  // Center star
+  if (star) {
+    elements += centerStar(50, 56, 6, color);
+  }
+
+  // Arcs below star
+  for (let a = 0; a < arcs; a++) {
+    const y = 65 + a * 7;
+    elements += `<path d="${rockerPath(y, 5, 60 + a * 6)}" fill="${color}" stroke="${stroke}" stroke-width="0.4"/>`;
+  }
+
+  if (topStar) {
+    elements += centerStar(50, 16, 5, color);
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="#2d3b4d" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ SPACE FORCE STYLE ============
+// Hexagonal border with delta and chevrons inside
+
+function spaceforceInsignia(config) {
+  const {
+    specialist = 0,   // 0 for E-1, 1-4 for Specialist ranks (stripes above delta)
+    sergeantChevrons = 0, // E-5, E-6
+    orbitalChevrons = 0,  // E-7, E-8, E-9
+    orbitalTier = 0,      // 1=low, 2=medium, 3=geosynch
+  } = config;
+
+  const color = '#c0c8d0';
+  const dark = '#1a2330';
+
+  let elements = '';
+
+  // Hexagonal border
+  const hex = 'M50,8 L82,26 L82,64 L50,82 L18,64 L18,26 Z';
+  elements += `<path d="${hex}" fill="${dark}" stroke="${color}" stroke-width="1.5"/>`;
+
+  if (specialist > 0) {
+    // Delta triangle in center
+    elements += `<path d="M50,58 L38,68 L62,68 Z" fill="${color}"/>`;
+
+    // Specialist stripes above delta (dots/small bars)
+    const positions = [
+      [], // 0
+      [[50, 28]], // 1
+      [[44, 28], [56, 28]], // 2
+      [[40, 28], [50, 28], [60, 28]], // 3
+      [[38, 28], [46, 28], [54, 28], [62, 28]] // 4
+    ];
+    (positions[specialist] || []).forEach(([x,y]) => {
+      elements += `<circle cx="${x}" cy="${y}" r="2.5" fill="${color}"/>`;
+    });
+    // Connect line for visual similarity to chevron stripes
+    if (specialist > 1) {
+      const first = positions[specialist][0];
+      const last = positions[specialist][positions[specialist].length-1];
+      elements += `<line x1="${first[0]-3}" y1="${first[1]}" x2="${last[0]+3}" y2="${last[1]}" stroke="${color}" stroke-width="1" opacity="0.4"/>`;
+    }
+  } else if (sergeantChevrons > 0) {
+    // Chevrons in middle
+    for (let c = 0; c < sergeantChevrons; c++) {
+      const y = 50 + c * 7;
+      elements += `<path d="${chevronPath(y, 4, 34, 50)}" fill="${color}"/>`;
+    }
+    // Small delta above
+    elements += `<path d="M50,30 L44,38 L56,38 Z" fill="${color}"/>`;
+  } else if (orbitalChevrons > 0) {
+    // Orbital curved chevrons (E-7, E-8, E-9)
+    // Delta ascending: position delta higher with more chevrons
+    const deltaY = 50 - orbitalChevrons * 3;
+    elements += `<path d="M50,${deltaY-6} L44,${deltaY+2} L56,${deltaY+2} Z" fill="${color}"/>`;
+    // Globe circle
+    elements += `<circle cx="50" cy="${deltaY+10}" r="5" fill="none" stroke="${color}" stroke-width="1.2"/>`;
+    elements += `<line x1="45" y1="${deltaY+10}" x2="55" y2="${deltaY+10}" stroke="${color}" stroke-width="0.8"/>`;
+    elements += `<line x1="50" y1="${deltaY+5}" x2="50" y2="${deltaY+15}" stroke="${color}" stroke-width="0.8"/>`;
+    // Arcs (orbital chevrons)
+    for (let a = 0; a < orbitalChevrons; a++) {
+      const y = 62 + a * 5;
+      elements += `<path d="M32,${y} Q50,${y+4} 68,${y}" fill="none" stroke="${color}" stroke-width="1.8"/>`;
+    }
+  } else {
+    // E-1: just delta in hexagon
+    elements += `<path d="M50,40 L36,62 L64,62 Z" fill="${color}"/>`;
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="#1a1f2e" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ NAVY / COAST GUARD ENLISTED ============
+// Eagle over chevrons, with rating badge (we'll keep rating generic)
+
+function navyEnlisted(config) {
+  const {
+    stripes = 0,       // E-2, E-3 have slanted stripes
+    chevrons = 0,      // petty officer chevrons
+    eagleTop = false,  // eagle on top for POs
+    stars = 0,         // CPO and above have stars above eagle
+    rating = false,    // rating badge (specialty)
+    coastguard = false,
+  } = config;
+
+  const bg = coastguard ? '#1a3a4a' : '#1a1a2e';
+  const gold = '#d4af37';
+  const silver = '#c8cdd4';
+  const red = coastguard ? '#e06c1e' : '#a02828';
+  const white = '#e8e4d3';
+
+  let elements = '';
+
+  // E-2, E-3: slanted stripes
+  if (stripes > 0 && !chevrons) {
+    const color = coastguard ? red : white;
+    for (let s = 0; s < stripes; s++) {
+      const y = 38 + s * 10;
+      elements += `<path d="M28,${y} L72,${y-10} L72,${y-5} L28,${y+5} Z" fill="${color}" stroke="#000" stroke-width="0.3"/>`;
+    }
+  }
+
+  // Chevrons for petty officers
+  if (chevrons > 0) {
+    const chColor = red;
+    for (let c = 0; c < chevrons; c++) {
+      const y = 70 - c * 8;
+      elements += `<path d="${chevronPath(y, 5, 50)}" fill="${chColor}" stroke="#000" stroke-width="0.3"/>`;
+    }
+    // Rating badge / eagle on top
+    if (eagleTop) {
+      elements += eagle(50, 38, 16, gold);
+      // Rating placeholder (small bird/crow)
+      if (rating) {
+        elements += `<rect x="46" y="44" width="8" height="4" fill="${silver}" rx="1"/>`;
+      }
+    }
+  }
+
+  // Stars for CPO+
+  if (stars > 0) {
+    for (let i = 0; i < stars; i++) {
+      const offset = (i - (stars-1)/2) * 10;
+      elements += centerStar(50 + offset, 22, 3.5, gold);
+    }
+  }
+
+  // E-1 has no insignia — render a placeholder
+  if (stripes === 0 && chevrons === 0 && stars === 0) {
+    elements += `<text x="50" y="54" text-anchor="middle" fill="${silver}" font-family="monospace" font-size="10" opacity="0.6">NO INSIGNIA</text>`;
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="${bg}" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ OFFICER INSIGNIA (pin-on rank) ============
+// Metal pins: bars, oak leaves, eagles, stars
+
+function officerPin(config) {
+  const {
+    bars = 0,         // 1 or 2 bars (O-1, O-2, O-3)
+    barColor = 'gold',// 'gold' or 'silver'
+    oakLeaves = 0,    // O-4, O-5
+    leafColor = 'gold',
+    eagle = false,    // O-6 Colonel/Captain (Navy)
+    stars = 0,        // O-7 through O-10
+    specialStar = false, // General of the Army (5-star with circle)
+    navyStyle = false, // For Navy/CG officers use stripes instead
+    stripes = 0,      // Navy sleeve stripes
+    stripeDetail = null,
+  } = config;
+
+  const gold = '#d4af37';
+  const silver = '#c8cdd4';
+  const darkBlue = '#0a1829';
+
+  let elements = '';
+
+  // Background
+  const bg = navyStyle ? darkBlue : '#1e2817';
+
+  // Pin-on insignia
+  if (bars > 0) {
+    const color = barColor === 'silver' ? silver : gold;
+    const stroke = '#4a3a10';
+    if (bars === 1) {
+      // Single bar centered
+      elements += `<rect x="30" y="45" width="40" height="10" fill="${color}" stroke="${stroke}" stroke-width="0.6" rx="1"/>`;
+      elements += `<rect x="32" y="47" width="36" height="2" fill="rgba(255,255,255,0.3)"/>`;
+    } else if (bars === 2) {
+      // Two bars (railroad tracks)
+      elements += `<rect x="30" y="40" width="40" height="8" fill="${color}" stroke="${stroke}" stroke-width="0.6" rx="1"/>`;
+      elements += `<rect x="32" y="41.5" width="36" height="1.5" fill="rgba(255,255,255,0.3)"/>`;
+      elements += `<rect x="30" y="52" width="40" height="8" fill="${color}" stroke="${stroke}" stroke-width="0.6" rx="1"/>`;
+      elements += `<rect x="32" y="53.5" width="36" height="1.5" fill="rgba(255,255,255,0.3)"/>`;
+    }
+  }
+
+  if (oakLeaves > 0) {
+    const color = leafColor === 'silver' ? silver : gold;
+    if (oakLeaves === 1) {
+      elements += oakLeaf(50, 50, 30, color);
+    } else if (oakLeaves === 2) {
+      elements += oakLeaf(34, 50, 22, color);
+      elements += oakLeaf(66, 50, 22, color);
+    }
+  }
+
+  if (eagle) {
+    elements += `<g transform="translate(50,50)">
+      <path d="M-20,0 Q-15,-6 -8,-4 L-2,-8 L0,-12 L2,-8 L8,-4 Q15,-6 20,0 Q18,4 12,5 L10,10 L5,8 L0,12 L-5,8 L-10,10 L-12,5 Q-18,4 -20,0 Z"
+        fill="${silver}" stroke="#333" stroke-width="0.5"/>
+      <circle cx="0" cy="-6" r="1.2" fill="#333"/>
+    </g>`;
+  }
+
+  if (stars > 0) {
+    if (specialStar) {
+      // 5-star circular arrangement (General of the Army)
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
+        const cx = 50 + Math.cos(angle) * 14;
+        const cy = 50 + Math.sin(angle) * 14;
+        elements += centerStar(cx, cy, 6, silver);
+      }
+    } else {
+      const spacing = Math.min(18, 64 / Math.max(stars, 1));
+      for (let i = 0; i < stars; i++) {
+        const offset = (i - (stars-1)/2) * spacing;
+        elements += centerStar(50 + offset, 50, 8, silver);
+      }
+    }
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="${bg}" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ NAVY OFFICER SLEEVE STRIPES ============
+function navyOfficerStripes(config) {
+  const {
+    thickStripes = 0,   // 0.5" stripes
+    mediumStripes = 0,  // 0.25" stripes between
+    starAbove = true,   // line officer star (most navy officers)
+    adm = 0,            // flag officer thick stripe count
+    coastguard = false,
+  } = config;
+
+  const gold = '#d4af37';
+  const darkBlue = coastguard ? '#001f3f' : '#0a1829';
+  const orange = '#e06c1e';
+
+  let elements = '';
+
+  // Star (line officer) or eagle (not drawn, kept generic)
+  if (starAbove) {
+    elements += centerStar(50, 20, 5, gold);
+  }
+
+  // Sleeve stripes — draw on shoulder board style
+  const stripeX = 18, stripeW = 64;
+  let y = 40;
+  const thickH = 5, medH = 2, gap = 2.5;
+
+  // For admirals (flag officers), draw one thick + stars
+  if (adm > 0) {
+    elements += `<rect x="${stripeX}" y="42" width="${stripeW}" height="7" fill="${gold}"/>`;
+    // Stars arranged
+    for (let i = 0; i < adm; i++) {
+      const offset = (i - (adm-1)/2) * 12;
+      elements += centerStar(50 + offset, 66, 5, gold);
+    }
+  } else {
+    // Standard officer stripes
+    for (let t = 0; t < thickStripes; t++) {
+      elements += `<rect x="${stripeX}" y="${y}" width="${stripeW}" height="${thickH}" fill="${gold}"/>`;
+      y += thickH + gap;
+      // Medium stripe between thick stripes (if any)
+      if (mediumStripes > 0 && t < thickStripes - 1) {
+        elements += `<rect x="${stripeX}" y="${y}" width="${stripeW}" height="${medH}" fill="${gold}"/>`;
+        y += medH + gap;
+      }
+    }
+    // Lone medium stripe (Lt JG has one thick + one medium)
+    if (thickStripes === 1 && mediumStripes === 1) {
+      // already handled above if inline; if trailing medium:
+      elements += `<rect x="${stripeX}" y="${y}" width="${stripeW}" height="${medH}" fill="${gold}"/>`;
+    }
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="${darkBlue}" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+// ============ WARRANT OFFICER ============
+function warrantOfficer(config) {
+  const {
+    level = 1,        // 1-5
+    service = 'army', // 'army', 'navy', 'marines'
+  } = config;
+
+  let elements = '';
+  const gold = '#d4af37';
+  const silver = '#c8cdd4';
+  const black = '#1a1a1a';
+  const red = '#a02828';
+
+  let bg = '#1e2817';
+  if (service === 'navy') bg = '#0a1829';
+  if (service === 'marines') bg = '#3a5f0b';
+
+  if (service === 'army' || service === 'airforce') {
+    // Army WO: vertical bar with squares
+    // W-1: one black square on silver bar
+    // W-2: two black squares
+    // W-3: three black squares
+    // W-4: four black squares
+    // W-5: single line (no squares)
+    const barX = 44, barY = 22, barW = 12, barH = 56;
+    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${silver}" stroke="#333" stroke-width="0.5"/>`;
+
+    if (level === 5) {
+      // Thin black vertical line down middle
+      elements += `<rect x="49" y="${barY+2}" width="2" height="${barH-4}" fill="${black}"/>`;
+    } else {
+      // Black squares
+      const sqSize = 8;
+      const spacing = (barH - 8) / (level);
+      for (let i = 0; i < level; i++) {
+        const sqY = barY + 4 + i * (sqSize + 2);
+        elements += `<rect x="${barX+2}" y="${sqY}" width="${sqSize}" height="${sqSize}" fill="${black}"/>`;
+      }
+    }
+  } else if (service === 'navy') {
+    // Navy WO: gold bar with blue breaks (W-2 through W-5)
+    // W-1 no longer used
+    const barX = 40, barY = 22, barW = 20, barH = 56;
+    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${gold}" stroke="#4a3a10" stroke-width="0.5"/>`;
+    // Blue breaks
+    for (let i = 0; i < level - 1; i++) {
+      const breakY = barY + (barH / level) * (i + 1) - 2;
+      elements += `<rect x="${barX}" y="${breakY}" width="${barW}" height="4" fill="${bg}"/>`;
+    }
+    // Specialty insignia at top (placeholder)
+    elements += `<circle cx="50" cy="16" r="5" fill="none" stroke="${silver}" stroke-width="1"/>`;
+    elements += `<path d="M46,16 L54,16 M50,12 L50,20" stroke="${silver}" stroke-width="1"/>`;
+  } else if (service === 'marines') {
+    // Marine WO: horizontal bar, red/gold/scarlet stripes
+    const barY = 40, barH = 18, barX = 18, barW = 64;
+    elements += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" fill="${silver}" stroke="#333" stroke-width="0.5"/>`;
+    // Red squares based on level
+    for (let i = 0; i < level; i++) {
+      const sqX = barX + 4 + i * 12;
+      elements += `<rect x="${sqX}" y="${barY + 3}" width="8" height="12" fill="${red}"/>`;
+    }
+  }
+
+  return svg(`
+    <rect width="100" height="100" fill="${bg}" rx="3"/>
+    <g>${elements}</g>
+  `);
+}
+
+/* ============================================================================
+   RANK DATA — All branches, all grades
+   ============================================================================ */
+
+const BRANCHES = {
+  army:        { id: 'army', name: 'Army', short: 'ARMY', color: '#8a9a5b' },
+  marines:     { id: 'marines', name: 'Marine Corps', short: 'USMC', color: '#d4af37' },
+  navy:        { id: 'navy', name: 'Navy', short: 'USN', color: '#d4af37' },
+  airforce:    { id: 'airforce', name: 'Air Force', short: 'USAF', color: '#c0c8d0' },
+  coastguard:  { id: 'coastguard', name: 'Coast Guard', short: 'USCG', color: '#e06c1e' },
+  spaceforce:  { id: 'spaceforce', name: 'Space Force', short: 'USSF', color: '#7a8baf' },
+};
+
+// Build all ranks
+// Each rank: { id, grade, name, abbr, branch, category (enlisted|officer|warrant), tier, svg }
+
+const RANKS = [];
+
+function addRank(r) {
+  RANKS.push(r);
+}
+
+// ============ ARMY ENLISTED ============
+addRank({ id:'army-e1', grade:'E-1', name:'Private', abbr:'PV1', branch:'army', category:'enlisted', tier:1,
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
+addRank({ id:'army-e2', grade:'E-2', name:'Private Second Class', abbr:'PV2', branch:'army', category:'enlisted', tier:2,
+  svg: armyChevron({chevrons:1}) });
+addRank({ id:'army-e3', grade:'E-3', name:'Private First Class', abbr:'PFC', branch:'army', category:'enlisted', tier:3,
+  svg: armyChevron({chevrons:1, rockers:1}) });
+addRank({ id:'army-e4-cpl', grade:'E-4', name:'Corporal', abbr:'CPL', branch:'army', category:'enlisted', tier:4,
+  svg: armyChevron({chevrons:2}) });
+addRank({ id:'army-e4-spc', grade:'E-4', name:'Specialist', abbr:'SPC', branch:'army', category:'enlisted', tier:4,
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+    <path d="M20,30 Q20,20 30,20 L70,20 Q80,20 80,30 L80,50 Q80,60 70,60 L30,60 Q20,60 20,50 Z" fill="none" stroke="#d4cdb5" stroke-width="1.5"/>
+    ${eagle(50, 42, 18, '#d4cdb5')}`) });
+addRank({ id:'army-e5', grade:'E-5', name:'Sergeant', abbr:'SGT', branch:'army', category:'enlisted', tier:5,
+  svg: armyChevron({chevrons:3}) });
+addRank({ id:'army-e6', grade:'E-6', name:'Staff Sergeant', abbr:'SSG', branch:'army', category:'enlisted', tier:6,
+  svg: armyChevron({chevrons:3, rockers:1}) });
+addRank({ id:'army-e7', grade:'E-7', name:'Sergeant First Class', abbr:'SFC', branch:'army', category:'enlisted', tier:7,
+  svg: armyChevron({chevrons:3, rockers:2}) });
+addRank({ id:'army-e8-msg', grade:'E-8', name:'Master Sergeant', abbr:'MSG', branch:'army', category:'enlisted', tier:8,
+  svg: armyChevron({chevrons:3, rockers:3}) });
+addRank({ id:'army-e8-1sg', grade:'E-8', name:'First Sergeant', abbr:'1SG', branch:'army', category:'enlisted', tier:8,
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+    ${armyChevron({chevrons:3, rockers:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    <text x="50" y="48" text-anchor="middle" fill="#d4cdb5" font-family="serif" font-size="12" font-weight="bold" font-style="italic">1</text>`) });
+addRank({ id:'army-e9-sgm', grade:'E-9', name:'Sergeant Major', abbr:'SGM', branch:'army', category:'enlisted', tier:9,
+  svg: armyChevron({chevrons:3, rockers:3, stars:1}) });
+addRank({ id:'army-e9-csm', grade:'E-9', name:'Command Sergeant Major', abbr:'CSM', branch:'army', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+    ${armyChevron({chevrons:3, rockers:3, stars:1}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    <circle cx="50" cy="40" r="10" fill="none" stroke="#d4cdb5" stroke-width="0.8" opacity="0.6"/>`) });
+addRank({ id:'army-e9-sma', grade:'E-9', name:'Sergeant Major of the Army', abbr:'SMA', branch:'army', category:'enlisted', tier:10,
+  svg: armyChevron({chevrons:3, rockers:3, stars:2}) });
+
+// ============ ARMY WARRANT ============
+addRank({ id:'army-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'army', category:'warrant', tier:1,
+  svg: warrantOfficer({level:1, service:'army'}) });
+addRank({ id:'army-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CW2', branch:'army', category:'warrant', tier:2,
+  svg: warrantOfficer({level:2, service:'army'}) });
+addRank({ id:'army-w3', grade:'W-3', name:'Chief Warrant Officer 3', abbr:'CW3', branch:'army', category:'warrant', tier:3,
+  svg: warrantOfficer({level:3, service:'army'}) });
+addRank({ id:'army-w4', grade:'W-4', name:'Chief Warrant Officer 4', abbr:'CW4', branch:'army', category:'warrant', tier:4,
+  svg: warrantOfficer({level:4, service:'army'}) });
+addRank({ id:'army-w5', grade:'W-5', name:'Chief Warrant Officer 5', abbr:'CW5', branch:'army', category:'warrant', tier:5,
+  svg: warrantOfficer({level:5, service:'army'}) });
+
+// ============ ARMY OFFICERS ============
+addRank({ id:'army-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2LT', branch:'army', category:'officer', tier:1,
+  svg: officerPin({bars:1, barColor:'gold'}) });
+addRank({ id:'army-o2', grade:'O-2', name:'First Lieutenant', abbr:'1LT', branch:'army', category:'officer', tier:2,
+  svg: officerPin({bars:1, barColor:'silver'}) });
+addRank({ id:'army-o3', grade:'O-3', name:'Captain', abbr:'CPT', branch:'army', category:'officer', tier:3,
+  svg: officerPin({bars:2, barColor:'silver'}) });
+addRank({ id:'army-o4', grade:'O-4', name:'Major', abbr:'MAJ', branch:'army', category:'officer', tier:4,
+  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+addRank({ id:'army-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'LTC', branch:'army', category:'officer', tier:5,
+  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+addRank({ id:'army-o6', grade:'O-6', name:'Colonel', abbr:'COL', branch:'army', category:'officer', tier:6,
+  svg: officerPin({eagle:true}) });
+addRank({ id:'army-o7', grade:'O-7', name:'Brigadier General', abbr:'BG', branch:'army', category:'officer', tier:7,
+  svg: officerPin({stars:1}) });
+addRank({ id:'army-o8', grade:'O-8', name:'Major General', abbr:'MG', branch:'army', category:'officer', tier:8,
+  svg: officerPin({stars:2}) });
+addRank({ id:'army-o9', grade:'O-9', name:'Lieutenant General', abbr:'LTG', branch:'army', category:'officer', tier:9,
+  svg: officerPin({stars:3}) });
+addRank({ id:'army-o10', grade:'O-10', name:'General', abbr:'GEN', branch:'army', category:'officer', tier:10,
+  svg: officerPin({stars:4}) });
+addRank({ id:'army-o11', grade:'Special', name:'General of the Army', abbr:'GA', branch:'army', category:'officer', tier:11,
+  svg: officerPin({stars:5, specialStar:true}) });
+
+// ============ MARINE ENLISTED ============
+addRank({ id:'marines-e1', grade:'E-1', name:'Private', abbr:'Pvt', branch:'marines', category:'enlisted', tier:1,
+  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
+addRank({ id:'marines-e2', grade:'E-2', name:'Private First Class', abbr:'PFC', branch:'marines', category:'enlisted', tier:2,
+  svg: marinesChevron({chevrons:1}) });
+addRank({ id:'marines-e3', grade:'E-3', name:'Lance Corporal', abbr:'LCpl', branch:'marines', category:'enlisted', tier:3,
+  svg: marinesChevron({chevrons:1, rifles:false, rockers:0, stars:0}) + ''.replace(/./, '') });
+// Lance Corporal has one chevron + crossed rifles
+RANKS[RANKS.length-1].svg = svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+  <path d="${chevronPath(48, 7, 70)}" fill="#c41e1e" stroke="#4a0000" stroke-width="0.5"/>
+  <g color="#c41e1e">${crossedRifles(50, 62, 10)}</g>`);
+addRank({ id:'marines-e4', grade:'E-4', name:'Corporal', abbr:'Cpl', branch:'marines', category:'enlisted', tier:4,
+  svg: marinesChevron({chevrons:2, rifles:true}) });
+addRank({ id:'marines-e5', grade:'E-5', name:'Sergeant', abbr:'Sgt', branch:'marines', category:'enlisted', tier:5,
+  svg: marinesChevron({chevrons:3, rifles:true}) });
+addRank({ id:'marines-e6', grade:'E-6', name:'Staff Sergeant', abbr:'SSgt', branch:'marines', category:'enlisted', tier:6,
+  svg: marinesChevron({chevrons:3, rockers:1, rifles:true}) });
+addRank({ id:'marines-e7', grade:'E-7', name:'Gunnery Sergeant', abbr:'GySgt', branch:'marines', category:'enlisted', tier:7,
+  svg: marinesChevron({chevrons:3, rockers:2, rifles:true}) });
+addRank({ id:'marines-e8-msgt', grade:'E-8', name:'Master Sergeant', abbr:'MSgt', branch:'marines', category:'enlisted', tier:8,
+  svg: marinesChevron({chevrons:3, rockers:3, rifles:true}) });
+addRank({ id:'marines-e8-1sgt', grade:'E-8', name:'First Sergeant', abbr:'1stSgt', branch:'marines', category:'enlisted', tier:8,
+  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+    ${marinesChevron({chevrons:3, rockers:3, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    <polygon points="46,42 54,42 50,52" fill="#c41e1e"/>`) });
+addRank({ id:'marines-e9-mgysgt', grade:'E-9', name:'Master Gunnery Sergeant', abbr:'MGySgt', branch:'marines', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#3a5f0b" rx="3"/>
+    ${marinesChevron({chevrons:3, rockers:4, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    <g color="#c41e1e">${crossedRifles(50, 44, 8)}</g>
+    <circle cx="50" cy="44" r="3" fill="#c41e1e" opacity="0.7"/>`) });
+addRank({ id:'marines-e9-sgtmaj', grade:'E-9', name:'Sergeant Major', abbr:'SgtMaj', branch:'marines', category:'enlisted', tier:9,
+  svg: marinesChevron({chevrons:3, rockers:4, stars:1, rifles:false}) });
+addRank({ id:'marines-e9-sgtmajmc', grade:'E-9', name:'Sergeant Major of the Marine Corps', abbr:'SgtMajMC', branch:'marines', category:'enlisted', tier:10,
+  svg: marinesChevron({chevrons:3, rockers:4, bursting:true, stars:0, rifles:false}) });
+
+// ============ MARINE WARRANT ============
+addRank({ id:'marines-w1', grade:'W-1', name:'Warrant Officer', abbr:'WO', branch:'marines', category:'warrant', tier:1,
+  svg: warrantOfficer({level:1, service:'marines'}) });
+addRank({ id:'marines-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CWO2', branch:'marines', category:'warrant', tier:2,
+  svg: warrantOfficer({level:2, service:'marines'}) });
+addRank({ id:'marines-w3', grade:'W-3', name:'Chief Warrant Officer 3', abbr:'CWO3', branch:'marines', category:'warrant', tier:3,
+  svg: warrantOfficer({level:3, service:'marines'}) });
+addRank({ id:'marines-w4', grade:'W-4', name:'Chief Warrant Officer 4', abbr:'CWO4', branch:'marines', category:'warrant', tier:4,
+  svg: warrantOfficer({level:4, service:'marines'}) });
+addRank({ id:'marines-w5', grade:'W-5', name:'Chief Warrant Officer 5', abbr:'CWO5', branch:'marines', category:'warrant', tier:5,
+  svg: warrantOfficer({level:5, service:'marines'}) });
+
+// ============ MARINE OFFICERS ============
+addRank({ id:'marines-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2ndLt', branch:'marines', category:'officer', tier:1,
+  svg: officerPin({bars:1, barColor:'gold'}) });
+addRank({ id:'marines-o2', grade:'O-2', name:'First Lieutenant', abbr:'1stLt', branch:'marines', category:'officer', tier:2,
+  svg: officerPin({bars:1, barColor:'silver'}) });
+addRank({ id:'marines-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'marines', category:'officer', tier:3,
+  svg: officerPin({bars:2, barColor:'silver'}) });
+addRank({ id:'marines-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'marines', category:'officer', tier:4,
+  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+addRank({ id:'marines-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'LtCol', branch:'marines', category:'officer', tier:5,
+  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+addRank({ id:'marines-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'marines', category:'officer', tier:6,
+  svg: officerPin({eagle:true}) });
+addRank({ id:'marines-o7', grade:'O-7', name:'Brigadier General', abbr:'BGen', branch:'marines', category:'officer', tier:7,
+  svg: officerPin({stars:1}) });
+addRank({ id:'marines-o8', grade:'O-8', name:'Major General', abbr:'MajGen', branch:'marines', category:'officer', tier:8,
+  svg: officerPin({stars:2}) });
+addRank({ id:'marines-o9', grade:'O-9', name:'Lieutenant General', abbr:'LtGen', branch:'marines', category:'officer', tier:9,
+  svg: officerPin({stars:3}) });
+addRank({ id:'marines-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'marines', category:'officer', tier:10,
+  svg: officerPin({stars:4}) });
+
+// ============ AIR FORCE ENLISTED ============
+addRank({ id:'af-e1', grade:'E-1', name:'Airman Basic', abbr:'AB', branch:'airforce', category:'enlisted', tier:1,
+  svg: svg(`<rect width="100" height="100" fill="#2d3b4d" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
+addRank({ id:'af-e2', grade:'E-2', name:'Airman', abbr:'Amn', branch:'airforce', category:'enlisted', tier:2,
+  svg: airforceChevron({chevrons:1, star:true}) });
+addRank({ id:'af-e3', grade:'E-3', name:'Airman First Class', abbr:'A1C', branch:'airforce', category:'enlisted', tier:3,
+  svg: airforceChevron({chevrons:2, star:true}) });
+addRank({ id:'af-e4', grade:'E-4', name:'Senior Airman', abbr:'SrA', branch:'airforce', category:'enlisted', tier:4,
+  svg: airforceChevron({chevrons:3, star:true}) });
+addRank({ id:'af-e5', grade:'E-5', name:'Staff Sergeant', abbr:'SSgt', branch:'airforce', category:'enlisted', tier:5,
+  svg: airforceChevron({chevrons:4, star:true}) });
+addRank({ id:'af-e6', grade:'E-6', name:'Technical Sergeant', abbr:'TSgt', branch:'airforce', category:'enlisted', tier:6,
+  svg: airforceChevron({chevrons:5, star:true}) });
+addRank({ id:'af-e7', grade:'E-7', name:'Master Sergeant', abbr:'MSgt', branch:'airforce', category:'enlisted', tier:7,
+  svg: airforceChevron({chevrons:5, star:true, arcs:1}) });
+addRank({ id:'af-e8', grade:'E-8', name:'Senior Master Sergeant', abbr:'SMSgt', branch:'airforce', category:'enlisted', tier:8,
+  svg: airforceChevron({chevrons:5, star:true, arcs:2}) });
+addRank({ id:'af-e9', grade:'E-9', name:'Chief Master Sergeant', abbr:'CMSgt', branch:'airforce', category:'enlisted', tier:9,
+  svg: airforceChevron({chevrons:5, star:true, arcs:3}) });
+addRank({ id:'af-e9-ccm', grade:'E-9', name:'Command Chief Master Sergeant', abbr:'CCM', branch:'airforce', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#2d3b4d" rx="3"/>
+    ${airforceChevron({chevrons:5, star:true, arcs:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
+    <circle cx="50" cy="56" r="9" fill="none" stroke="#c0c8d0" stroke-width="0.6" opacity="0.6"/>`) });
+addRank({ id:'af-e9-cmsaf', grade:'E-9', name:'Chief Master Sergeant of the Air Force', abbr:'CMSAF', branch:'airforce', category:'enlisted', tier:10,
+  svg: airforceChevron({chevrons:5, star:true, arcs:3, topStar:true}) });
+
+// ============ AIR FORCE OFFICERS ============ (same insignia as Army)
+addRank({ id:'af-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'airforce', category:'officer', tier:1,
+  svg: officerPin({bars:1, barColor:'gold'}) });
+addRank({ id:'af-o2', grade:'O-2', name:'First Lieutenant', abbr:'1st Lt', branch:'airforce', category:'officer', tier:2,
+  svg: officerPin({bars:1, barColor:'silver'}) });
+addRank({ id:'af-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'airforce', category:'officer', tier:3,
+  svg: officerPin({bars:2, barColor:'silver'}) });
+addRank({ id:'af-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'airforce', category:'officer', tier:4,
+  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+addRank({ id:'af-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'Lt Col', branch:'airforce', category:'officer', tier:5,
+  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+addRank({ id:'af-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'airforce', category:'officer', tier:6,
+  svg: officerPin({eagle:true}) });
+addRank({ id:'af-o7', grade:'O-7', name:'Brigadier General', abbr:'Brig Gen', branch:'airforce', category:'officer', tier:7,
+  svg: officerPin({stars:1}) });
+addRank({ id:'af-o8', grade:'O-8', name:'Major General', abbr:'Maj Gen', branch:'airforce', category:'officer', tier:8,
+  svg: officerPin({stars:2}) });
+addRank({ id:'af-o9', grade:'O-9', name:'Lieutenant General', abbr:'Lt Gen', branch:'airforce', category:'officer', tier:9,
+  svg: officerPin({stars:3}) });
+addRank({ id:'af-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'airforce', category:'officer', tier:10,
+  svg: officerPin({stars:4}) });
+
+// ============ NAVY ENLISTED ============
+addRank({ id:'navy-e1', grade:'E-1', name:'Seaman Recruit', abbr:'SR', branch:'navy', category:'enlisted', tier:1,
+  svg: navyEnlisted({}) });
+addRank({ id:'navy-e2', grade:'E-2', name:'Seaman Apprentice', abbr:'SA', branch:'navy', category:'enlisted', tier:2,
+  svg: navyEnlisted({stripes:2}) });
+addRank({ id:'navy-e3', grade:'E-3', name:'Seaman', abbr:'SN', branch:'navy', category:'enlisted', tier:3,
+  svg: navyEnlisted({stripes:3}) });
+addRank({ id:'navy-e4', grade:'E-4', name:'Petty Officer Third Class', abbr:'PO3', branch:'navy', category:'enlisted', tier:4,
+  svg: navyEnlisted({chevrons:1, eagleTop:true, rating:true}) });
+addRank({ id:'navy-e5', grade:'E-5', name:'Petty Officer Second Class', abbr:'PO2', branch:'navy', category:'enlisted', tier:5,
+  svg: navyEnlisted({chevrons:2, eagleTop:true, rating:true}) });
+addRank({ id:'navy-e6', grade:'E-6', name:'Petty Officer First Class', abbr:'PO1', branch:'navy', category:'enlisted', tier:6,
+  svg: navyEnlisted({chevrons:3, eagleTop:true, rating:true}) });
+addRank({ id:'navy-e7', grade:'E-7', name:'Chief Petty Officer', abbr:'CPO', branch:'navy', category:'enlisted', tier:7,
+  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'navy-e8', grade:'E-8', name:'Senior Chief Petty Officer', abbr:'SCPO', branch:'navy', category:'enlisted', tier:8,
+  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
+    ${centerStar(50, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'navy-e9-mcpo', grade:'E-9', name:'Master Chief Petty Officer', abbr:'MCPO', branch:'navy', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
+    ${centerStar(42, 16, 4, '#d4af37')}${centerStar(58, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'navy-e9-formc', grade:'E-9', name:'Fleet/Command Master Chief Petty Officer', abbr:'FORCM/FLTMC', branch:'navy', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
+    ${centerStar(38, 16, 4, '#c8cdd4')}${centerStar(50, 16, 4, '#c8cdd4')}${centerStar(62, 16, 4, '#c8cdd4')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'navy-e9-mcpon', grade:'E-9', name:'Master Chief Petty Officer of the Navy', abbr:'MCPON', branch:'navy', category:'enlisted', tier:10,
+  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
+    ${centerStar(38, 16, 4, '#d4af37')}${centerStar(50, 16, 4, '#d4af37')}${centerStar(62, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}
+    <text x="50" y="85" text-anchor="middle" fill="#d4af37" font-family="serif" font-size="6">MCPON</text>`) });
+
+// ============ NAVY WARRANT (W-1 obsolete, W-2 through W-5) ============
+addRank({ id:'navy-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CWO2', branch:'navy', category:'warrant', tier:2,
+  svg: warrantOfficer({level:2, service:'navy'}) });
+addRank({ id:'navy-w3', grade:'W-3', name:'Chief Warrant Officer 3', abbr:'CWO3', branch:'navy', category:'warrant', tier:3,
+  svg: warrantOfficer({level:3, service:'navy'}) });
+addRank({ id:'navy-w4', grade:'W-4', name:'Chief Warrant Officer 4', abbr:'CWO4', branch:'navy', category:'warrant', tier:4,
+  svg: warrantOfficer({level:4, service:'navy'}) });
+addRank({ id:'navy-w5', grade:'W-5', name:'Chief Warrant Officer 5', abbr:'CWO5', branch:'navy', category:'warrant', tier:5,
+  svg: warrantOfficer({level:5, service:'navy'}) });
+
+// ============ NAVY OFFICERS ============
+addRank({ id:'navy-o1', grade:'O-1', name:'Ensign', abbr:'ENS', branch:'navy', category:'officer', tier:1,
+  svg: navyOfficerStripes({thickStripes:1, mediumStripes:0}) });
+addRank({ id:'navy-o2', grade:'O-2', name:'Lieutenant Junior Grade', abbr:'LTJG', branch:'navy', category:'officer', tier:2,
+  svg: navyOfficerStripes({thickStripes:1, mediumStripes:1}) });
+addRank({ id:'navy-o3', grade:'O-3', name:'Lieutenant', abbr:'LT', branch:'navy', category:'officer', tier:3,
+  svg: navyOfficerStripes({thickStripes:2, mediumStripes:0}) });
+addRank({ id:'navy-o4', grade:'O-4', name:'Lieutenant Commander', abbr:'LCDR', branch:'navy', category:'officer', tier:4,
+  svg: navyOfficerStripes({thickStripes:2, mediumStripes:1}) });
+addRank({ id:'navy-o5', grade:'O-5', name:'Commander', abbr:'CDR', branch:'navy', category:'officer', tier:5,
+  svg: navyOfficerStripes({thickStripes:3, mediumStripes:0}) });
+addRank({ id:'navy-o6', grade:'O-6', name:'Captain', abbr:'CAPT', branch:'navy', category:'officer', tier:6,
+  svg: navyOfficerStripes({thickStripes:4, mediumStripes:0}) });
+addRank({ id:'navy-o7', grade:'O-7', name:'Rear Admiral (Lower Half)', abbr:'RDML', branch:'navy', category:'officer', tier:7,
+  svg: navyOfficerStripes({adm:1}) });
+addRank({ id:'navy-o8', grade:'O-8', name:'Rear Admiral (Upper Half)', abbr:'RADM', branch:'navy', category:'officer', tier:8,
+  svg: navyOfficerStripes({adm:2}) });
+addRank({ id:'navy-o9', grade:'O-9', name:'Vice Admiral', abbr:'VADM', branch:'navy', category:'officer', tier:9,
+  svg: navyOfficerStripes({adm:3}) });
+addRank({ id:'navy-o10', grade:'O-10', name:'Admiral', abbr:'ADM', branch:'navy', category:'officer', tier:10,
+  svg: navyOfficerStripes({adm:4}) });
+addRank({ id:'navy-o11', grade:'Special', name:'Fleet Admiral', abbr:'FADM', branch:'navy', category:'officer', tier:11,
+  svg: navyOfficerStripes({adm:5}) });
+
+// ============ COAST GUARD ENLISTED ============
+addRank({ id:'cg-e1', grade:'E-1', name:'Seaman Recruit', abbr:'SR', branch:'coastguard', category:'enlisted', tier:1,
+  svg: navyEnlisted({coastguard:true}) });
+addRank({ id:'cg-e2', grade:'E-2', name:'Seaman Apprentice', abbr:'SA', branch:'coastguard', category:'enlisted', tier:2,
+  svg: navyEnlisted({stripes:2, coastguard:true}) });
+addRank({ id:'cg-e3', grade:'E-3', name:'Seaman', abbr:'SN', branch:'coastguard', category:'enlisted', tier:3,
+  svg: navyEnlisted({stripes:3, coastguard:true}) });
+addRank({ id:'cg-e4', grade:'E-4', name:'Petty Officer Third Class', abbr:'PO3', branch:'coastguard', category:'enlisted', tier:4,
+  svg: navyEnlisted({chevrons:1, eagleTop:true, rating:true, coastguard:true}) });
+addRank({ id:'cg-e5', grade:'E-5', name:'Petty Officer Second Class', abbr:'PO2', branch:'coastguard', category:'enlisted', tier:5,
+  svg: navyEnlisted({chevrons:2, eagleTop:true, rating:true, coastguard:true}) });
+addRank({ id:'cg-e6', grade:'E-6', name:'Petty Officer First Class', abbr:'PO1', branch:'coastguard', category:'enlisted', tier:6,
+  svg: navyEnlisted({chevrons:3, eagleTop:true, rating:true, coastguard:true}) });
+addRank({ id:'cg-e7', grade:'E-7', name:'Chief Petty Officer', abbr:'CPO', branch:'coastguard', category:'enlisted', tier:7,
+  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'cg-e8', grade:'E-8', name:'Senior Chief Petty Officer', abbr:'SCPO', branch:'coastguard', category:'enlisted', tier:8,
+  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
+    ${centerStar(50, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'cg-e9-mcpo', grade:'E-9', name:'Master Chief Petty Officer', abbr:'MCPO', branch:'coastguard', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
+    ${centerStar(42, 16, 4, '#d4af37')}${centerStar(58, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'cg-e9-cmc', grade:'E-9', name:'Command Master Chief', abbr:'CMC', branch:'coastguard', category:'enlisted', tier:9,
+  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
+    ${centerStar(42, 16, 4, '#c8cdd4')}${centerStar(58, 16, 4, '#c8cdd4')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+addRank({ id:'cg-e9-mcpocg', grade:'E-9', name:'Master Chief Petty Officer of the Coast Guard', abbr:'MCPO-CG', branch:'coastguard', category:'enlisted', tier:10,
+  svg: svg(`<rect width="100" height="100" fill="#1a3a4a" rx="3"/>
+    ${centerStar(38, 16, 4, '#d4af37')}${centerStar(50, 16, 4, '#d4af37')}${centerStar(62, 16, 4, '#d4af37')}
+    <rect x="20" y="58" width="60" height="8" fill="#d4af37"/>
+    <rect x="20" y="70" width="60" height="4" fill="#d4af37"/>
+    ${eagle(50, 40, 18, '#d4af37')}`) });
+
+// ============ COAST GUARD WARRANT ============
+addRank({ id:'cg-w2', grade:'W-2', name:'Chief Warrant Officer 2', abbr:'CWO2', branch:'coastguard', category:'warrant', tier:2,
+  svg: warrantOfficer({level:2, service:'navy'}) });
+addRank({ id:'cg-w3', grade:'W-3', name:'Chief Warrant Officer 3', abbr:'CWO3', branch:'coastguard', category:'warrant', tier:3,
+  svg: warrantOfficer({level:3, service:'navy'}) });
+addRank({ id:'cg-w4', grade:'W-4', name:'Chief Warrant Officer 4', abbr:'CWO4', branch:'coastguard', category:'warrant', tier:4,
+  svg: warrantOfficer({level:4, service:'navy'}) });
+
+// ============ COAST GUARD OFFICERS (same structure as Navy) ============
+addRank({ id:'cg-o1', grade:'O-1', name:'Ensign', abbr:'ENS', branch:'coastguard', category:'officer', tier:1,
+  svg: navyOfficerStripes({thickStripes:1, mediumStripes:0, coastguard:true}) });
+addRank({ id:'cg-o2', grade:'O-2', name:'Lieutenant Junior Grade', abbr:'LTJG', branch:'coastguard', category:'officer', tier:2,
+  svg: navyOfficerStripes({thickStripes:1, mediumStripes:1, coastguard:true}) });
+addRank({ id:'cg-o3', grade:'O-3', name:'Lieutenant', abbr:'LT', branch:'coastguard', category:'officer', tier:3,
+  svg: navyOfficerStripes({thickStripes:2, mediumStripes:0, coastguard:true}) });
+addRank({ id:'cg-o4', grade:'O-4', name:'Lieutenant Commander', abbr:'LCDR', branch:'coastguard', category:'officer', tier:4,
+  svg: navyOfficerStripes({thickStripes:2, mediumStripes:1, coastguard:true}) });
+addRank({ id:'cg-o5', grade:'O-5', name:'Commander', abbr:'CDR', branch:'coastguard', category:'officer', tier:5,
+  svg: navyOfficerStripes({thickStripes:3, mediumStripes:0, coastguard:true}) });
+addRank({ id:'cg-o6', grade:'O-6', name:'Captain', abbr:'CAPT', branch:'coastguard', category:'officer', tier:6,
+  svg: navyOfficerStripes({thickStripes:4, mediumStripes:0, coastguard:true}) });
+addRank({ id:'cg-o7', grade:'O-7', name:'Rear Admiral (Lower Half)', abbr:'RDML', branch:'coastguard', category:'officer', tier:7,
+  svg: navyOfficerStripes({adm:1, coastguard:true}) });
+addRank({ id:'cg-o8', grade:'O-8', name:'Rear Admiral (Upper Half)', abbr:'RADM', branch:'coastguard', category:'officer', tier:8,
+  svg: navyOfficerStripes({adm:2, coastguard:true}) });
+addRank({ id:'cg-o9', grade:'O-9', name:'Vice Admiral', abbr:'VADM', branch:'coastguard', category:'officer', tier:9,
+  svg: navyOfficerStripes({adm:3, coastguard:true}) });
+addRank({ id:'cg-o10', grade:'O-10', name:'Admiral', abbr:'ADM', branch:'coastguard', category:'officer', tier:10,
+  svg: navyOfficerStripes({adm:4, coastguard:true}) });
+
+// ============ SPACE FORCE ENLISTED ============
+addRank({ id:'sf-e1', grade:'E-1', name:'Specialist 1', abbr:'Spc1', branch:'spaceforce', category:'enlisted', tier:1,
+  svg: spaceforceInsignia({specialist:0}) });
+addRank({ id:'sf-e2', grade:'E-2', name:'Specialist 2', abbr:'Spc2', branch:'spaceforce', category:'enlisted', tier:2,
+  svg: spaceforceInsignia({specialist:2}) });
+addRank({ id:'sf-e3', grade:'E-3', name:'Specialist 3', abbr:'Spc3', branch:'spaceforce', category:'enlisted', tier:3,
+  svg: spaceforceInsignia({specialist:3}) });
+addRank({ id:'sf-e4', grade:'E-4', name:'Specialist 4', abbr:'Spc4', branch:'spaceforce', category:'enlisted', tier:4,
+  svg: spaceforceInsignia({specialist:4}) });
+addRank({ id:'sf-e5', grade:'E-5', name:'Sergeant', abbr:'Sgt', branch:'spaceforce', category:'enlisted', tier:5,
+  svg: spaceforceInsignia({sergeantChevrons:1}) });
+addRank({ id:'sf-e6', grade:'E-6', name:'Technical Sergeant', abbr:'TSgt', branch:'spaceforce', category:'enlisted', tier:6,
+  svg: spaceforceInsignia({sergeantChevrons:2}) });
+addRank({ id:'sf-e7', grade:'E-7', name:'Master Sergeant', abbr:'MSgt', branch:'spaceforce', category:'enlisted', tier:7,
+  svg: spaceforceInsignia({orbitalChevrons:1, orbitalTier:1}) });
+addRank({ id:'sf-e8', grade:'E-8', name:'Senior Master Sergeant', abbr:'SMSgt', branch:'spaceforce', category:'enlisted', tier:8,
+  svg: spaceforceInsignia({orbitalChevrons:2, orbitalTier:2}) });
+addRank({ id:'sf-e9', grade:'E-9', name:'Chief Master Sergeant', abbr:'CMSgt', branch:'spaceforce', category:'enlisted', tier:9,
+  svg: spaceforceInsignia({orbitalChevrons:3, orbitalTier:3}) });
+addRank({ id:'sf-e9-cmsssf', grade:'E-9', name:'Chief Master Sergeant of the Space Force', abbr:'CMSSF', branch:'spaceforce', category:'enlisted', tier:10,
+  svg: svg(`<rect width="100" height="100" fill="#1a1f2e" rx="3"/>
+    <path d="M50,6 L82,24 L82,62 L50,80 L18,62 L18,24 Z" fill="#1a2330" stroke="#c0c8d0" stroke-width="1.5"/>
+    <path d="M50,30 L44,38 L56,38 Z" fill="#c0c8d0"/>
+    <circle cx="50" cy="48" r="5" fill="none" stroke="#c0c8d0" stroke-width="1.2"/>
+    <path d="M32,60 Q50,64 68,60" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
+    <path d="M32,66 Q50,70 68,66" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
+    <path d="M32,72 Q50,76 68,72" fill="none" stroke="#c0c8d0" stroke-width="1.8"/>
+    ${centerStar(50, 18, 3, '#d4af37')}`) });
+
+// ============ SPACE FORCE OFFICERS ============ (same as Air Force)
+addRank({ id:'sf-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'spaceforce', category:'officer', tier:1,
+  svg: officerPin({bars:1, barColor:'gold'}) });
+addRank({ id:'sf-o2', grade:'O-2', name:'First Lieutenant', abbr:'1st Lt', branch:'spaceforce', category:'officer', tier:2,
+  svg: officerPin({bars:1, barColor:'silver'}) });
+addRank({ id:'sf-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'spaceforce', category:'officer', tier:3,
+  svg: officerPin({bars:2, barColor:'silver'}) });
+addRank({ id:'sf-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'spaceforce', category:'officer', tier:4,
+  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+addRank({ id:'sf-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'Lt Col', branch:'spaceforce', category:'officer', tier:5,
+  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+addRank({ id:'sf-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'spaceforce', category:'officer', tier:6,
+  svg: officerPin({eagle:true}) });
+addRank({ id:'sf-o7', grade:'O-7', name:'Brigadier General', abbr:'Brig Gen', branch:'spaceforce', category:'officer', tier:7,
+  svg: officerPin({stars:1}) });
+addRank({ id:'sf-o8', grade:'O-8', name:'Major General', abbr:'Maj Gen', branch:'spaceforce', category:'officer', tier:8,
+  svg: officerPin({stars:2}) });
+addRank({ id:'sf-o9', grade:'O-9', name:'Lieutenant General', abbr:'Lt Gen', branch:'spaceforce', category:'officer', tier:9,
+  svg: officerPin({stars:3}) });
+addRank({ id:'sf-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'spaceforce', category:'officer', tier:10,
+  svg: officerPin({stars:4}) });
+
+/* ============================================================================
+   PERSISTENCE (localStorage)
+   ============================================================================ */
+
+const STORAGE_KEY = 'rankfile_v1';
+
+const DEFAULT_STATE = {
+  starred: {},              // { rankId: true }
+  leitner: {},              // { rankId: boxNumber 1-5 }
+  stats: {                  // per-card stats
+    seen: {},               // { rankId: count }
+    correct: {},            // { rankId: count }
+    missed: {},             // { rankId: count }
+  },
+  global: {
+    sessions: 0,
+    totalAnswers: 0,
+  },
+  // UI preferences
+  prefs: {
+    branches: { army: true, marines: true, navy: true, airforce: true, coastguard: true, spaceforce: true },
+    categories: { enlisted: true, officer: true, warrant: false },
+    mode: 'insignia',  // insignia | rank | mixed | quiz
+    shuffle: true,
+    starredOnly: false,
+    leitner: true,
+    sessionSize: 20,
+  }
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    // Merge with defaults
+    return {
+      ...DEFAULT_STATE,
+      ...parsed,
+      prefs: { ...DEFAULT_STATE.prefs, ...(parsed.prefs || {}), branches: { ...DEFAULT_STATE.prefs.branches, ...((parsed.prefs||{}).branches||{}) }, categories: { ...DEFAULT_STATE.prefs.categories, ...((parsed.prefs||{}).categories||{}) } },
+      stats: { ...DEFAULT_STATE.stats, ...(parsed.stats || {}) },
+      global: { ...DEFAULT_STATE.global, ...(parsed.global || {}) },
+    };
+  } catch(e) {
+    console.warn('Load failed', e);
+    return structuredClone(DEFAULT_STATE);
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    console.warn('Save failed', e);
+  }
+}
+
+let state = loadState();
+
+/* ============================================================================
+   APP LOGIC
+   ============================================================================ */
+
+let session = null;  // { cards: [...], idx: 0, mode, results: {good, ok, bad} }
+
+function $(id) { return document.getElementById(id); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+// ============ FILTER / SETUP RENDERING ============
+function renderSetup() {
+  const bg = $('branches-grid');
+  bg.innerHTML = '';
+  Object.values(BRANCHES).forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'branch-toggle' + (state.prefs.branches[b.id] ? ' on' : '');
+    btn.innerHTML = `<span class="dot"></span><span>${b.short}</span>`;
+    btn.onclick = () => {
+      state.prefs.branches[b.id] = !state.prefs.branches[b.id];
+      saveState();
+      renderSetup();
+    };
+    bg.appendChild(btn);
+  });
+
+  const cg = $('categories-grid');
+  cg.innerHTML = '';
+  [['enlisted','Enlisted'], ['officer','Officer'], ['warrant','Warrant']].forEach(([id, label]) => {
+    const btn = document.createElement('button');
+    btn.className = 'branch-toggle' + (state.prefs.categories[id] ? ' on' : '');
+    btn.innerHTML = `<span class="dot"></span><span>${label}</span>`;
+    btn.onclick = () => {
+      state.prefs.categories[id] = !state.prefs.categories[id];
+      saveState();
+      renderSetup();
+    };
+    cg.appendChild(btn);
+  });
+
+  // Mode buttons
+  $$('.opt-card[data-mode]').forEach(b => {
+    b.classList.toggle('on', b.dataset.mode === state.prefs.mode);
+    b.onclick = () => {
+      state.prefs.mode = b.dataset.mode;
+      saveState();
+      renderSetup();
+    };
+  });
+
+  // Toggles
+  $('toggle-shuffle').classList.toggle('on', state.prefs.shuffle);
+  $('toggle-starred').classList.toggle('on', state.prefs.starredOnly);
+  $('toggle-leitner').classList.toggle('on', state.prefs.leitner);
+
+  // Stats
+  const filtered = filterCards();
+  $('setup-count').textContent = filtered.length;
+
+  const mastered = Object.values(state.leitner).filter(b => b >= 5).length;
+  const weak = Object.values(state.leitner).filter(b => b <= 2 && b > 0).length;
+  $('setup-mastered').textContent = mastered;
+  $('setup-weak').textContent = weak;
+  $('starred-count').textContent = Object.keys(state.starred).filter(k => state.starred[k]).length;
+
+  $('start-session').disabled = filtered.length === 0;
+}
+
+function filterCards() {
+  return RANKS.filter(r => {
+    if (!state.prefs.branches[r.branch]) return false;
+    if (!state.prefs.categories[r.category]) return false;
+    if (state.prefs.starredOnly && !state.starred[r.id]) return false;
+    return true;
+  });
+}
+
+// ============ SESSION ============
+function startSession() {
+  let cards = filterCards();
+  if (cards.length === 0) return;
+
+  if (state.prefs.leitner) {
+    // Weight by Leitner box: lower box = more likely to appear
+    // Cards never studied get middle priority
+    cards = cards.map(c => {
+      const box = state.leitner[c.id] || 3;  // default 3 (middle)
+      const weight = 6 - box; // box 1 -> weight 5, box 5 -> weight 1
+      return { card: c, weight };
+    });
+    // Weighted shuffle
+    cards.sort((a, b) => (b.weight + Math.random()*2) - (a.weight + Math.random()*2));
+    cards = cards.map(x => x.card);
+  } else if (state.prefs.shuffle) {
+    cards = shuffleArray(cards);
+  }
+
+  const size = Math.min(cards.length, state.prefs.sessionSize);
+  cards = cards.slice(0, size);
+
+  session = {
+    cards,
+    idx: 0,
+    mode: state.prefs.mode,
+    results: { good: 0, ok: 0, bad: 0 },
+    flipped: false,
+  };
+
+  state.global.sessions++;
+  saveState();
+
+  switchView('card');
+  renderCard();
+}
+
+function endSession() {
+  if (!session) return;
+  $('result-good').textContent = session.results.good;
+  $('result-ok').textContent = session.results.ok;
+  $('result-bad').textContent = session.results.bad;
+  switchView('complete');
+  session = null;
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============ CARD RENDERING ============
+function getCardMode(card) {
+  // For mixed mode, alternate direction randomly per card
+  if (session.mode === 'mixed') {
+    return Math.random() < 0.5 ? 'insignia' : 'rank';
+  }
+  return session.mode;
+}
+
+function renderCard() {
+  if (!session || session.idx >= session.cards.length) {
+    endSession();
+    return;
+  }
+
+  const card = session.cards[session.idx];
+  const currentMode = session._cardMode = (session._cardMode_idx === session.idx)
+    ? session._cardMode
+    : getCardMode(card);
+  session._cardMode_idx = session.idx;
+
+  const branch = BRANCHES[card.branch];
+
+  // Progress
+  $('card-counter').textContent = `${session.idx + 1} / ${session.cards.length}`;
+  $('progress-fill').style.width = `${((session.idx) / session.cards.length) * 100}%`;
+
+  // Star state
+  $('star-icon').textContent = state.starred[card.id] ? '★' : '☆';
+  $('btn-star').classList.toggle('starred', !!state.starred[card.id]);
+
+  // Reset flip
+  session.flipped = false;
+  $('flashcard').classList.remove('flipped');
+
+  // Hide rating until flipped
+  $('rating-row').classList.add('hidden');
+  $('quiz-choices').classList.add('hidden');
+
+  // Set branch color CSS var
+  $('flashcard').style.setProperty('--branch-color', branch.color);
+
+  const front = $('card-front');
+  const back = $('card-back');
+  front.style.setProperty('--branch-color', branch.color);
+  back.style.setProperty('--branch-color', branch.color);
+
+  const box = state.leitner[card.id] || 0;
+  const boxLabel = box === 0 ? 'NEW' : `BOX ${box}/5`;
+
+  if (currentMode === 'quiz') {
+    renderQuizCard(card, branch, boxLabel);
+    return;
+  }
+
+  if (currentMode === 'insignia') {
+    // Front: show insignia, ask for rank
+    front.innerHTML = `
+      <div class="card-branch-strip"></div>
+      <div class="card-meta">
+        <span>${branch.short}</span>
+        <span>${card.category.toUpperCase()}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-prompt">Identify this insignia</div>
+        <div class="insignia-container">${card.svg}</div>
+      </div>
+      <div class="card-tier">${boxLabel}</div>
+      <div class="flip-hint">▸ Tap to flip</div>
+    `;
+    back.innerHTML = `
+      <div class="card-branch-strip"></div>
+      <div class="card-meta">
+        <span>${branch.short}</span>
+        <span>${card.grade}</span>
+      </div>
+      <div class="card-body">
+        <div class="rank-abbr">${card.abbr}</div>
+        <div class="rank-name">${card.name}</div>
+        <div class="branch-badge">${branch.name}</div>
+      </div>
+      <div class="card-tier">${card.grade} · ${card.category.toUpperCase()}</div>
+    `;
+  } else if (currentMode === 'rank') {
+    // Front: show rank name + service, ask for grade
+    front.innerHTML = `
+      <div class="card-branch-strip"></div>
+      <div class="card-meta">
+        <span>${branch.short}</span>
+        <span>${card.category.toUpperCase()}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-prompt">Identify the pay grade</div>
+        <div class="rank-name" style="margin-top: 20px; font-size: 24px;">${card.name}</div>
+        <div class="rank-abbr" style="margin-top: 10px;">${card.abbr}</div>
+        <div class="branch-badge">${branch.name}</div>
+      </div>
+      <div class="card-tier">${boxLabel}</div>
+      <div class="flip-hint">▸ Tap to flip</div>
+    `;
+    back.innerHTML = `
+      <div class="card-branch-strip"></div>
+      <div class="card-meta">
+        <span>${branch.short}</span>
+        <span>${card.abbr}</span>
+      </div>
+      <div class="card-body">
+        <div class="paygrade-label">Pay Grade</div>
+        <div class="paygrade-big">${card.grade}</div>
+        <div style="color: var(--text-dim); font-family: 'Oswald', sans-serif; letter-spacing: 0.15em; text-transform: uppercase; font-size: 11px;">${card.name}</div>
+        <div style="margin-top: 14px;">
+          <div class="insignia-container" style="width: 120px; height: 120px;">${card.svg}</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderQuizCard(card, branch, boxLabel) {
+  // Build 4 options. Correct is card.name; distractors from same branch/category if possible
+  const pool = RANKS.filter(r => r.id !== card.id && (r.branch === card.branch || r.category === card.category));
+  const distractors = shuffleArray(pool).slice(0, 3);
+  const options = shuffleArray([card, ...distractors]);
+
+  const front = $('card-front');
+  const back = $('card-back');
+
+  front.innerHTML = `
+    <div class="card-branch-strip"></div>
+    <div class="card-meta">
+      <span>${branch.short}</span>
+      <span>MULTIPLE CHOICE</span>
+    </div>
+    <div class="card-body">
+      <div class="card-prompt">Which rank is this?</div>
+      <div class="insignia-container">${card.svg}</div>
+    </div>
+    <div class="card-tier">${boxLabel}</div>
+  `;
+
+  // Build choices
+  const choicesEl = $('quiz-choices');
+  choicesEl.innerHTML = '';
+  choicesEl.classList.remove('hidden');
+
+  options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'action-btn';
+    b.style.padding = '14px 10px';
+    b.style.minHeight = '60px';
+    b.style.flexDirection = 'column';
+    b.innerHTML = `<div style="font-weight: 600; color: var(--text); font-size: 11px;">${opt.name}</div>
+                   <div style="font-size: 9px; color: var(--text-faint); margin-top: 3px;">${BRANCHES[opt.branch].short} · ${opt.grade}</div>`;
+    b.onclick = () => handleQuizAnswer(opt.id === card.id, card);
+    choicesEl.appendChild(b);
+  });
+
+  // Hide flip controls for quiz
+  $('rating-row').classList.add('hidden');
+}
+
+function handleQuizAnswer(correct, card) {
+  // Mark choices; disable
+  const btns = $('quiz-choices').querySelectorAll('button');
+  btns.forEach(b => {
+    b.disabled = true;
+    const txt = b.querySelector('div').textContent;
+    if (txt === card.name) {
+      b.style.background = 'var(--success)';
+      b.style.borderColor = 'var(--success)';
+      b.style.color = 'var(--bg)';
+      b.querySelector('div').style.color = 'var(--bg)';
+    }
+  });
+
+  // Record
+  recordAnswer(card, correct ? 2 : 0);
+
+  setTimeout(() => {
+    session.idx++;
+    renderCard();
+  }, 900);
+}
+
+function flipCard() {
+  if (!session) return;
+  if (session.mode === 'quiz') return; // quiz doesn't flip
+  session.flipped = !session.flipped;
+  $('flashcard').classList.toggle('flipped', session.flipped);
+  $('rating-row').classList.toggle('hidden', !session.flipped);
+}
+
+function recordAnswer(card, rating) {
+  // rating: 0=bad, 1=ok, 2=good
+  const id = card.id;
+
+  state.stats.seen[id] = (state.stats.seen[id] || 0) + 1;
+  if (rating === 2) {
+    state.stats.correct[id] = (state.stats.correct[id] || 0) + 1;
+    session.results.good++;
+  } else if (rating === 1) {
+    session.results.ok++;
+  } else {
+    state.stats.missed[id] = (state.stats.missed[id] || 0) + 1;
+    session.results.bad++;
+  }
+  state.global.totalAnswers++;
+
+  // Leitner update
+  const cur = state.leitner[id] || 3;
+  let next;
+  if (rating === 2) next = Math.min(5, cur + 1);
+  else if (rating === 1) next = cur;
+  else next = Math.max(1, cur - 1);
+  state.leitner[id] = next;
+
+  saveState();
+}
+
+function rateCard(rating) {
+  if (!session) return;
+  const card = session.cards[session.idx];
+  recordAnswer(card, rating);
+  session.idx++;
+  renderCard();
+}
+
+function toggleStar() {
+  if (!session) return;
+  const card = session.cards[session.idx];
+  state.starred[card.id] = !state.starred[card.id];
+  $('star-icon').textContent = state.starred[card.id] ? '★' : '☆';
+  $('btn-star').classList.toggle('starred', !!state.starred[card.id]);
+  saveState();
+  toast(state.starred[card.id] ? '★ Starred' : 'Unstarred');
+}
+
+// ============ VIEW SWITCHING ============
+function switchView(name) {
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $(`view-${name}`).classList.add('active');
+
+  // Tabs
+  $$('nav.tabs button').forEach(b => b.classList.remove('active'));
+  if (name === 'setup' || name === 'card' || name === 'complete') {
+    $('tab-study').classList.add('active');
+  } else if (name === 'reference') {
+    $('tab-reference').classList.add('active');
+  } else if (name === 'stats') {
+    $('tab-stats').classList.add('active');
+    renderStats();
+  }
+
+  if (name === 'reference') renderReference();
+  if (name === 'setup') renderSetup();
+}
+
+// ============ REFERENCE VIEW ============
+let refFilter = 'all';
+
+function renderReference() {
+  const filters = $('ref-filters');
+  filters.innerHTML = '';
+  const allPill = document.createElement('button');
+  allPill.className = 'ref-pill' + (refFilter === 'all' ? ' on' : '');
+  allPill.textContent = 'All';
+  allPill.onclick = () => { refFilter = 'all'; renderReference(); };
+  filters.appendChild(allPill);
+
+  Object.values(BRANCHES).forEach(b => {
+    const p = document.createElement('button');
+    p.className = 'ref-pill' + (refFilter === b.id ? ' on' : '');
+    p.textContent = b.short;
+    p.onclick = () => { refFilter = b.id; renderReference(); };
+    filters.appendChild(p);
+  });
+
+  const content = $('reference-content');
+  content.innerHTML = '';
+
+  const branchList = refFilter === 'all' ? Object.keys(BRANCHES) : [refFilter];
+
+  branchList.forEach(bId => {
+    const branch = BRANCHES[bId];
+    ['enlisted', 'warrant', 'officer'].forEach(cat => {
+      const cards = RANKS.filter(r => r.branch === bId && r.category === cat).sort((a,b) => a.tier - b.tier);
+      if (cards.length === 0) return;
+
+      const section = document.createElement('div');
+      section.className = 'ref-branch';
+      section.style.setProperty('--branch-color', branch.color);
+      section.innerHTML = `
+        <div class="ref-branch-title">
+          <span>${branch.name}</span>
+          <span class="cat-label">${cat.toUpperCase()}</span>
+        </div>
+        <div class="ref-grid" id="ref-grid-${bId}-${cat}"></div>
+      `;
+      content.appendChild(section);
+
+      const grid = section.querySelector('.ref-grid');
+      cards.forEach(c => {
+        const el = document.createElement('div');
+        el.className = 'ref-card';
+        el.innerHTML = `
+          <div class="ref-insignia">${c.svg}</div>
+          <div class="ref-grade">${c.grade}</div>
+          <div class="ref-name">${c.name}</div>
+          <div class="ref-abbr">${c.abbr}</div>
+        `;
+        el.onclick = () => {
+          state.starred[c.id] = !state.starred[c.id];
+          saveState();
+          el.style.outline = state.starred[c.id] ? `2px solid var(--accent)` : 'none';
+          toast(state.starred[c.id] ? `★ ${c.name}` : `Unstarred ${c.name}`);
+        };
+        if (state.starred[c.id]) el.style.outline = `2px solid var(--accent)`;
+        grid.appendChild(el);
+      });
+    });
+  });
+}
+
+// ============ STATS VIEW ============
+function renderStats() {
+  const seenCount = Object.keys(state.stats.seen).length;
+  const totalAns = state.global.totalAnswers;
+  const sessions = state.global.sessions;
+
+  $('stat-seen').textContent = seenCount;
+  $('stat-sessions').textContent = sessions;
+  $('stat-total').textContent = totalAns;
+
+  // Leitner boxes
+  const boxes = [1, 2, 3, 4, 5];
+  const counts = boxes.map(b => Object.values(state.leitner).filter(v => v === b).length);
+  const boxEl = $('leitner-boxes');
+  boxEl.innerHTML = '';
+  boxes.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'toggle-row';
+    row.style.marginBottom = '4px';
+    const labels = ['Learning (weakest)', 'Struggling', 'Developing', 'Confident', 'Mastered'];
+    const colors = ['var(--danger)', 'var(--warn)', 'var(--accent)', 'var(--success)', '#8ab87c'];
+    row.innerHTML = `
+      <div>
+        <div class="label-text">Box ${b} · ${labels[i]}</div>
+        <div class="hint">${counts[i]} cards</div>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: ${colors[i]}; font-weight: 700;">${counts[i]}</div>
+    `;
+    boxEl.appendChild(row);
+  });
+
+  // Weakest cards (most missed)
+  const weak = RANKS
+    .filter(r => state.stats.missed[r.id])
+    .sort((a, b) => (state.stats.missed[b.id] || 0) - (state.stats.missed[a.id] || 0))
+    .slice(0, 10);
+
+  const weakEl = $('weak-list');
+  weakEl.innerHTML = '';
+  if (weak.length === 0) {
+    weakEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-faint); font-style: italic;">No weak cards yet. Complete a session to see data here.</div>`;
+  } else {
+    weak.forEach(c => {
+      const missed = state.stats.missed[c.id] || 0;
+      const correct = state.stats.correct[c.id] || 0;
+      const row = document.createElement('div');
+      row.className = 'toggle-row';
+      row.style.marginBottom = '4px';
+      row.innerHTML = `
+        <div style="display: flex; gap: 10px; align-items: center; flex: 1;">
+          <div style="width: 36px; height: 36px;">${c.svg}</div>
+          <div>
+            <div class="label-text">${c.name}</div>
+            <div class="hint">${BRANCHES[c.branch].short} · ${c.grade}</div>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--danger);">✕${missed} ✓${correct}</div>
+      `;
+      weakEl.appendChild(row);
+    });
+  }
+}
+
+/* ============================================================================
+   EVENT WIRING
+   ============================================================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Tabs
+  $$('nav.tabs button').forEach(b => {
+    b.onclick = () => {
+      const v = b.dataset.view;
+      switchView(v);
+    };
+  });
+
+  // Toggles
+  $('toggle-shuffle').onclick = () => {
+    state.prefs.shuffle = !state.prefs.shuffle;
+    saveState();
+    renderSetup();
+  };
+  $('toggle-starred').onclick = () => {
+    state.prefs.starredOnly = !state.prefs.starredOnly;
+    saveState();
+    renderSetup();
+  };
+  $('toggle-leitner').onclick = () => {
+    state.prefs.leitner = !state.prefs.leitner;
+    saveState();
+    renderSetup();
+  };
+
+  // Start
+  $('start-session').onclick = startSession;
+  $('restart-btn').onclick = () => switchView('setup');
+  $('end-session').onclick = () => {
+    if (confirm('End this session?')) endSession();
+  };
+
+  // Flip & actions
+  $('flashcard').onclick = (e) => {
+    if (e.target.closest('button')) return;
+    flipCard();
+  };
+  $('btn-flip').onclick = flipCard;
+  $('btn-star').onclick = toggleStar;
+  $('btn-skip').onclick = () => {
+    if (!session) return;
+    session.idx++;
+    renderCard();
+  };
+
+  // Rating
+  $$('.rate-btn').forEach(b => {
+    b.onclick = () => rateCard(parseInt(b.dataset.rate));
+  });
+
+  // Reset
+  $('reset-progress').onclick = () => {
+    if (confirm('This will erase ALL your progress, stars, and stats. Continue?')) {
+      state = structuredClone(DEFAULT_STATE);
+      saveState();
+      renderStats();
+      toast('All progress reset');
+    }
+  };
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (!session || session.mode === 'quiz') {
+      if (e.key === 'Enter' && document.activeElement === document.body) {
+        if ($('view-setup').classList.contains('active')) startSession();
+      }
+      return;
+    }
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      flipCard();
+    } else if (e.key === '1' && session.flipped) rateCard(0);
+    else if (e.key === '2' && session.flipped) rateCard(1);
+    else if (e.key === '3' && session.flipped) rateCard(2);
+    else if (e.key.toLowerCase() === 's') toggleStar();
+    else if (e.key === 'ArrowRight') { session.idx++; renderCard(); }
+  });
+
+  // Touch: swipe to advance
+  let touchStart = null;
+  const wrap = document.querySelector('.flashcard-wrap');
+  wrap.addEventListener('touchstart', (e) => {
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+  }, { passive: true });
+  wrap.addEventListener('touchend', (e) => {
+    if (!touchStart || !session) return;
+    const dx = e.changedTouches[0].clientX - touchStart.x;
+    const dy = e.changedTouches[0].clientY - touchStart.y;
+    const dt = Date.now() - touchStart.time;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 500) {
+      if (dx < 0) {
+        // swipe left: next
+        session.idx++;
+        renderCard();
+      } else {
+        // swipe right: previous
+        if (session.idx > 0) {
+          session.idx--;
+          renderCard();
+        }
+      }
+    }
+    touchStart = null;
+  }, { passive: true });
+
+  // Initial render
+  renderSetup();
+});
+</script>
+</body>
+</html>
