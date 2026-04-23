@@ -615,6 +615,7 @@ nav.tabs button:not(.active):hover {
 }
 
 .card-tier {
+  display: none; /* Hidden - not needed in UI */
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--text-faint);
@@ -1346,7 +1347,7 @@ function marinesChevron(config) {
   }
 
   return svg(`
-    <rect width="100" height="100" fill="#4b5320" rx="3"/>
+    <rect width="100" height="100" fill="#2d3a1f" rx="3"/>
     <g>${elements}</g>
   `);
 }
@@ -1456,11 +1457,20 @@ function spaceforceInsignia(config) {
 
   let elements = '';
 
+  // Top rockers (E-7+) - rainbow oriented (downward arc)
+  if (rockers > 0) {
+    let rockerY = 8;
+    for (let r = 0; r < rockers; r++) {
+      elements += `<path d="${rockerPathInverted(rockerY, 4, 72)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
+      rockerY += 5;
+    }
+  }
+
   // Upward-pointing delta arrowhead (larger size)
   if (deltaTop) {
     // E-5+: Delta at top
-    const rockerBottomY = 18 + (rockers * 5);
-    const deltaY = rockerBottomY + 4;
+    const rockerBottomY = 8 + (rockers * 5);
+    const deltaY = rockerBottomY + 3;
     elements += `<path d="M50,${deltaY} L38,${deltaY+16} L62,${deltaY+16} Z" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
 
     // Flanking stars for CMSSF
@@ -1492,21 +1502,17 @@ function spaceforceInsignia(config) {
     }
   }
 
-  // Top rockers (E-7+) - rainbow oriented (downward arc)
-  if (rockers > 0) {
-    let rockerY = 10;
-    for (let r = 0; r < rockers; r++) {
-      elements += `<path d="${rockerPathInverted(rockerY, 4, 72)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
-      rockerY += 5;
-    }
-  }
-
-  // Downward chevrons at bottom (E-5+)
+  // Downward chevrons at bottom (E-5+) - moved up to prevent extending off bottom
   if (downwardChevrons > 0) {
-    let chevY = 70;
+    // Start higher to ensure chevrons don't extend past y=95
+    const chevronHeight = 4;
+    const chevronSpacing = 6;
+    const totalChevronHeight = downwardChevrons * (chevronHeight + chevronSpacing);
+    const startY = 92 - totalChevronHeight; // Leave 8px margin at bottom
+    let chevY = startY;
     for (let c = 0; c < downwardChevrons; c++) {
-      elements += `<path d="${chevronPathDown(chevY, 4, 70)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
-      chevY += 6;
+      elements += `<path d="${chevronPathDown(chevY, chevronHeight, 70)}" fill="${color}" stroke="${blue}" stroke-width="0.5"/>`;
+      chevY += chevronSpacing;
     }
   }
 
@@ -1530,6 +1536,7 @@ function navyEnlisted(config) {
     cpo = false,       // Chief Petty Officer style (3 chevrons + rocker + eagle)
     middleStar = false, // Command Master Chief has star between chevrons and rocker
     goldStars = false,  // MCPO-CG has gold stars instead of silver
+    eagleLow = false,   // MCPON has eagle between rocker and chevrons instead of above rocker
   } = config;
 
   const bg = coastguard ? '#1a3a4a' : '#1a1a2e';
@@ -1579,14 +1586,18 @@ function navyEnlisted(config) {
     }
     // Inverted rocker (arc above chevrons) in gold
     elements += `<path d="${rockerPathInverted(48, 5, 55)}" fill="${gold}" stroke="#000" stroke-width="0.3"/>`;
-    // Eagle above rocker in white
-    elements += eagle(50, 34, 16, white);
+    // Eagle - above rocker (normal) or between rocker and chevrons (MCPON)
+    const eagleY = eagleLow ? 53 : 34;
+    const eagleColor = goldStars ? gold : white; // MCPON has gold eagle
+    elements += eagle(50, eagleY, 16, eagleColor);
     // Stars at top (if any) - silver or gold depending on goldStars parameter
+    // For MCPON with eagleLow, stars go where eagle normally is
     if (stars > 0) {
       const starColor = goldStars ? gold : silver;
+      const starY = eagleLow ? 34 : 18;
       for (let i = 0; i < stars; i++) {
         const offset = (i - (stars-1)/2) * 12;
-        elements += centerStar(50 + offset, 18, 5.5, starColor);
+        elements += centerStar(50 + offset, starY, 5.5, starColor);
       }
     }
   }
@@ -1614,19 +1625,25 @@ function officerPin(config) {
     eagle = false,    // O-6 Colonel/Captain (Navy)
     stars = 0,        // O-7 through O-10
     specialStar = false, // General of the Army (5-star with circle)
-    navyStyle = false, // For Navy/CG officers use stripes instead
+    navyStyle = false, // For Navy/CG officers
+    marineStyle = false, // For Marine officers
+    airforceStyle = false, // For Air Force officers
+    spaceforceStyle = false, // For Space Force officers
     stripes = 0,      // Navy sleeve stripes
     stripeDetail = null,
   } = config;
 
   const gold = '#d4af37';
   const silver = '#c8cdd4';
-  const darkBlue = '#0a1829';
 
   let elements = '';
 
-  // Background
-  const bg = navyStyle ? darkBlue : '#1e2817';
+  // Background by branch
+  let bg = '#4b5320'; // Army green (default)
+  if (navyStyle) bg = '#0a1829'; // Navy dark blue
+  if (marineStyle) bg = '#2d3a1f'; // Marine green (distinct from Army)
+  if (airforceStyle) bg = '#2d3b4d'; // Air Force blue
+  if (spaceforceStyle) bg = '#1a1f2e'; // Space Force dark blue
 
   // Pin-on insignia
   if (bars > 0) {
@@ -1758,9 +1775,10 @@ function warrantOfficer(config) {
   const black = '#1a1a1a';
   const red = '#a02828';
 
-  let bg = '#1e2817';
-  if (service === 'navy') bg = '#0a1829';
-  if (service === 'marines') bg = '#4b5320';
+  let bg = '#4b5320'; // Army green
+  if (service === 'navy') bg = '#0a1829'; // Navy dark blue
+  if (service === 'marines') bg = '#2d3a1f'; // Marine green
+  if (service === 'airforce') bg = '#2d3b4d'; // Air Force blue
 
   if (service === 'army' || service === 'airforce') {
     // Army WO: vertical bar with squares
@@ -1950,13 +1968,13 @@ addRank({ id:'army-o11', grade:'Special', name:'General of the Army', abbr:'GA',
 
 // ============ MARINE ENLISTED ============
 addRank({ id:'marines-e1', grade:'E-1', name:'Private', abbr:'Pvt', branch:'marines', category:'enlisted', tier:1,
-  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
+  svg: svg(`<rect width="100" height="100" fill="#2d3a1f" rx="3"/><text x="50" y="54" text-anchor="middle" fill="#c0c0c0" font-family="monospace" font-size="9" opacity="0.6">NO INSIGNIA</text>`) });
 addRank({ id:'marines-e2', grade:'E-2', name:'Private First Class', abbr:'PFC', branch:'marines', category:'enlisted', tier:2,
   svg: marinesChevron({chevrons:1}) });
 addRank({ id:'marines-e3', grade:'E-3', name:'Lance Corporal', abbr:'LCpl', branch:'marines', category:'enlisted', tier:3,
   svg: marinesChevron({chevrons:1, rifles:false, rockers:0, stars:0}) + ''.replace(/./, '') });
 // Lance Corporal has one chevron + crossed rifles
-RANKS[RANKS.length-1].svg = svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+RANKS[RANKS.length-1].svg = svg(`<rect width="100" height="100" fill="#2d3a1f" rx="3"/>
   <path d="${chevronPath(48, 7, 70)}" fill="#c41e1e" stroke="#4a0000" stroke-width="0.5"/>
   <g color="#c41e1e">${crossedRifles(50, 62, 10)}</g>`);
 addRank({ id:'marines-e4', grade:'E-4', name:'Corporal', abbr:'Cpl', branch:'marines', category:'enlisted', tier:4,
@@ -1970,11 +1988,11 @@ addRank({ id:'marines-e7', grade:'E-7', name:'Gunnery Sergeant', abbr:'GySgt', b
 addRank({ id:'marines-e8-msgt', grade:'E-8', name:'Master Sergeant', abbr:'MSgt', branch:'marines', category:'enlisted', tier:8,
   svg: marinesChevron({chevrons:3, rockers:3, rifles:true}) });
 addRank({ id:'marines-e8-1sgt', grade:'E-8', name:'First Sergeant', abbr:'1stSgt', branch:'marines', category:'enlisted', tier:8,
-  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+  svg: svg(`<rect width="100" height="100" fill="#2d3a1f" rx="3"/>
     ${marinesChevron({chevrons:3, rockers:3, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
     <polygon points="46,51 54,51 50,58" fill="#c41e1e"/>`) });
 addRank({ id:'marines-e9-mgysgt', grade:'E-9', name:'Master Gunnery Sergeant', abbr:'MGySgt', branch:'marines', category:'enlisted', tier:9,
-  svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
+  svg: svg(`<rect width="100" height="100" fill="#2d3a1f" rx="3"/>
     ${marinesChevron({chevrons:3, rockers:4, rifles:false}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
     ${pineapple(50, 50, 14, '#c41e1e')}`) });
 addRank({ id:'marines-e9-sgtmaj', grade:'E-9', name:'Sergeant Major', abbr:'SgtMaj', branch:'marines', category:'enlisted', tier:9,
@@ -1996,25 +2014,25 @@ addRank({ id:'marines-w5', grade:'W-5', name:'Chief Warrant Officer 5', abbr:'CW
 
 // ============ MARINE OFFICERS ============
 addRank({ id:'marines-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2ndLt', branch:'marines', category:'officer', tier:1,
-  svg: officerPin({bars:1, barColor:'gold'}) });
+  svg: officerPin({bars:1, barColor:'gold', marineStyle:true}) });
 addRank({ id:'marines-o2', grade:'O-2', name:'First Lieutenant', abbr:'1stLt', branch:'marines', category:'officer', tier:2,
-  svg: officerPin({bars:1, barColor:'silver'}) });
+  svg: officerPin({bars:1, barColor:'silver', marineStyle:true}) });
 addRank({ id:'marines-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'marines', category:'officer', tier:3,
-  svg: officerPin({bars:2, barColor:'silver'}) });
+  svg: officerPin({bars:2, barColor:'silver', marineStyle:true}) });
 addRank({ id:'marines-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'marines', category:'officer', tier:4,
-  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'gold', marineStyle:true}) });
 addRank({ id:'marines-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'LtCol', branch:'marines', category:'officer', tier:5,
-  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'silver', marineStyle:true}) });
 addRank({ id:'marines-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'marines', category:'officer', tier:6,
-  svg: officerPin({eagle:true}) });
+  svg: officerPin({eagle:true, marineStyle:true}) });
 addRank({ id:'marines-o7', grade:'O-7', name:'Brigadier General', abbr:'BGen', branch:'marines', category:'officer', tier:7,
-  svg: officerPin({stars:1}) });
+  svg: officerPin({stars:1, marineStyle:true}) });
 addRank({ id:'marines-o8', grade:'O-8', name:'Major General', abbr:'MajGen', branch:'marines', category:'officer', tier:8,
-  svg: officerPin({stars:2}) });
+  svg: officerPin({stars:2, marineStyle:true}) });
 addRank({ id:'marines-o9', grade:'O-9', name:'Lieutenant General', abbr:'LtGen', branch:'marines', category:'officer', tier:9,
-  svg: officerPin({stars:3}) });
+  svg: officerPin({stars:3, marineStyle:true}) });
 addRank({ id:'marines-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'marines', category:'officer', tier:10,
-  svg: officerPin({stars:4}) });
+  svg: officerPin({stars:4, marineStyle:true}) });
 
 // ============ AIR FORCE ENLISTED ============
 addRank({ id:'af-e1', grade:'E-1', name:'Airman Basic', abbr:'AB', branch:'airforce', category:'enlisted', tier:1,
@@ -2048,25 +2066,25 @@ addRank({ id:'af-e9-cmsaf', grade:'E-9', name:'Chief Master Sergeant of the Air 
 
 // ============ AIR FORCE OFFICERS ============ (same insignia as Army)
 addRank({ id:'af-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'airforce', category:'officer', tier:1,
-  svg: officerPin({bars:1, barColor:'gold'}) });
+  svg: officerPin({bars:1, barColor:'gold', airforceStyle:true}) });
 addRank({ id:'af-o2', grade:'O-2', name:'First Lieutenant', abbr:'1st Lt', branch:'airforce', category:'officer', tier:2,
-  svg: officerPin({bars:1, barColor:'silver'}) });
+  svg: officerPin({bars:1, barColor:'silver', airforceStyle:true}) });
 addRank({ id:'af-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'airforce', category:'officer', tier:3,
-  svg: officerPin({bars:2, barColor:'silver'}) });
+  svg: officerPin({bars:2, barColor:'silver', airforceStyle:true}) });
 addRank({ id:'af-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'airforce', category:'officer', tier:4,
-  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'gold', airforceStyle:true}) });
 addRank({ id:'af-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'Lt Col', branch:'airforce', category:'officer', tier:5,
-  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'silver', airforceStyle:true}) });
 addRank({ id:'af-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'airforce', category:'officer', tier:6,
-  svg: officerPin({eagle:true}) });
+  svg: officerPin({eagle:true, airforceStyle:true}) });
 addRank({ id:'af-o7', grade:'O-7', name:'Brigadier General', abbr:'Brig Gen', branch:'airforce', category:'officer', tier:7,
-  svg: officerPin({stars:1}) });
+  svg: officerPin({stars:1, airforceStyle:true}) });
 addRank({ id:'af-o8', grade:'O-8', name:'Major General', abbr:'Maj Gen', branch:'airforce', category:'officer', tier:8,
-  svg: officerPin({stars:2}) });
+  svg: officerPin({stars:2, airforceStyle:true}) });
 addRank({ id:'af-o9', grade:'O-9', name:'Lieutenant General', abbr:'Lt Gen', branch:'airforce', category:'officer', tier:9,
-  svg: officerPin({stars:3}) });
+  svg: officerPin({stars:3, airforceStyle:true}) });
 addRank({ id:'af-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'airforce', category:'officer', tier:10,
-  svg: officerPin({stars:4}) });
+  svg: officerPin({stars:4, airforceStyle:true}) });
 
 // ============ NAVY ENLISTED ============
 addRank({ id:'navy-e1', grade:'E-1', name:'Seaman Recruit', abbr:'SR', branch:'navy', category:'enlisted', tier:1,
@@ -2090,11 +2108,9 @@ addRank({ id:'navy-e9-mcpo', grade:'E-9', name:'Master Chief Petty Officer', abb
 addRank({ id:'navy-e9-formc', grade:'E-9', name:'Fleet/Command Master Chief Petty Officer', abbr:'FORCM/FLTMC', branch:'navy', category:'enlisted', tier:9,
   svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
     ${navyEnlisted({stars:2, cpo:true}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    ${centerStar(50, 43, 5.5, '#c8cdd4')}`) });
+    ${centerStar(50, 53, 5.5, '#c8cdd4')}`) });
 addRank({ id:'navy-e9-mcpon', grade:'E-9', name:'Master Chief Petty Officer of the Navy', abbr:'MCPON', branch:'navy', category:'enlisted', tier:10,
-  svg: svg(`<rect width="100" height="100" fill="#1a1a2e" rx="3"/>
-    ${navyEnlisted({stars:3, cpo:true}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '').replace(/#c8cdd4/g, '#d4af37')}
-    <text x="50" y="90" text-anchor="middle" fill="#d4af37" font-family="serif" font-size="6">MCPON</text>`) });
+  svg: navyEnlisted({stars:2, cpo:true, goldStars:true, eagleLow:true}) });
 
 // ============ NAVY WARRANT ============
 addRank({ id:'navy-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'navy', category:'warrant', tier:1,
@@ -2210,25 +2226,25 @@ addRank({ id:'sf-e9-cmsssf', grade:'E-9', name:'Chief Master Sergeant of the Spa
 
 // ============ SPACE FORCE OFFICERS ============ (same as Air Force)
 addRank({ id:'sf-o1', grade:'O-1', name:'Second Lieutenant', abbr:'2d Lt', branch:'spaceforce', category:'officer', tier:1,
-  svg: officerPin({bars:1, barColor:'gold'}) });
+  svg: officerPin({bars:1, barColor:'gold', spaceforceStyle:true}) });
 addRank({ id:'sf-o2', grade:'O-2', name:'First Lieutenant', abbr:'1st Lt', branch:'spaceforce', category:'officer', tier:2,
-  svg: officerPin({bars:1, barColor:'silver'}) });
+  svg: officerPin({bars:1, barColor:'silver', spaceforceStyle:true}) });
 addRank({ id:'sf-o3', grade:'O-3', name:'Captain', abbr:'Capt', branch:'spaceforce', category:'officer', tier:3,
-  svg: officerPin({bars:2, barColor:'silver'}) });
+  svg: officerPin({bars:2, barColor:'silver', spaceforceStyle:true}) });
 addRank({ id:'sf-o4', grade:'O-4', name:'Major', abbr:'Maj', branch:'spaceforce', category:'officer', tier:4,
-  svg: officerPin({oakLeaves:1, leafColor:'gold'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'gold', spaceforceStyle:true}) });
 addRank({ id:'sf-o5', grade:'O-5', name:'Lieutenant Colonel', abbr:'Lt Col', branch:'spaceforce', category:'officer', tier:5,
-  svg: officerPin({oakLeaves:1, leafColor:'silver'}) });
+  svg: officerPin({oakLeaves:1, leafColor:'silver', spaceforceStyle:true}) });
 addRank({ id:'sf-o6', grade:'O-6', name:'Colonel', abbr:'Col', branch:'spaceforce', category:'officer', tier:6,
-  svg: officerPin({eagle:true}) });
+  svg: officerPin({eagle:true, spaceforceStyle:true}) });
 addRank({ id:'sf-o7', grade:'O-7', name:'Brigadier General', abbr:'Brig Gen', branch:'spaceforce', category:'officer', tier:7,
-  svg: officerPin({stars:1}) });
+  svg: officerPin({stars:1, spaceforceStyle:true}) });
 addRank({ id:'sf-o8', grade:'O-8', name:'Major General', abbr:'Maj Gen', branch:'spaceforce', category:'officer', tier:8,
-  svg: officerPin({stars:2}) });
+  svg: officerPin({stars:2, spaceforceStyle:true}) });
 addRank({ id:'sf-o9', grade:'O-9', name:'Lieutenant General', abbr:'Lt Gen', branch:'spaceforce', category:'officer', tier:9,
-  svg: officerPin({stars:3}) });
+  svg: officerPin({stars:3, spaceforceStyle:true}) });
 addRank({ id:'sf-o10', grade:'O-10', name:'General', abbr:'Gen', branch:'spaceforce', category:'officer', tier:10,
-  svg: officerPin({stars:4}) });
+  svg: officerPin({stars:4, spaceforceStyle:true}) });
 
 /* ============================================================================
    PERSISTENCE (localStorage)
@@ -2444,6 +2460,14 @@ function renderCard() {
     return;
   }
 
+  // Reset flip state FIRST, before any other DOM operations
+  session.flipped = false;
+  $('flashcard').classList.remove('flipped');
+
+  // Hide rating until flipped
+  $('rating-row').classList.add('hidden');
+  $('quiz-choices').classList.add('hidden');
+
   const card = session.cards[session.idx];
   const currentMode = session._cardMode = (session._cardMode_idx === session.idx)
     ? session._cardMode
@@ -2459,14 +2483,6 @@ function renderCard() {
   // Star state
   $('star-icon').textContent = state.starred[card.id] ? '★' : '☆';
   $('btn-star').classList.toggle('starred', !!state.starred[card.id]);
-
-  // Reset flip
-  session.flipped = false;
-  $('flashcard').classList.remove('flipped');
-
-  // Hide rating until flipped
-  $('rating-row').classList.add('hidden');
-  $('quiz-choices').classList.add('hidden');
 
   // Set branch color CSS var
   $('flashcard').style.setProperty('--branch-color', branch.color);
