@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#2d3420">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#2d5a3d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rank File">
+<meta name="description" content="Study and memorize US military rank insignia across all service branches">
 <title>Rank &amp; File — US Armed Forces Rank Study</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232d3420'/%3E%3Cpath d='M20 70 L50 30 L80 70 Z' fill='%23c9a961' stroke='%23f4ead5' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
 <style>
 /* ============================================
    RANK & FILE — Field Manual meets Study Tool
@@ -938,9 +944,48 @@ nav.tabs button:not(.active):hover {
 @supports (padding: env(safe-area-inset-bottom)) {
   #app { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 }
+
+/* Splash screen (shown while loading) */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #2d5a3d 0%, #1a3324 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeOut 0.5s ease-in-out 0.5s forwards;
+}
+#splash img {
+  width: 160px;
+  height: 160px;
+  margin-bottom: 24px;
+  animation: pulse 2s ease-in-out infinite;
+}
+#splash h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #d4af37;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.95); }
+}
+@keyframes fadeOut {
+  to { opacity: 0; pointer-events: none; }
+}
 </style>
 </head>
 <body>
+<!-- Splash Screen -->
+<div id="splash">
+  <img src="icon-192.png" alt="Rank File">
+  <h1>RANK FILE</h1>
+</div>
 <div id="app">
   <header class="app-header">
     <div class="brand">
@@ -2943,6 +2988,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial render
   renderSetup();
+
+  // Register service worker for offline support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/Rank-File/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registered:', registration.scope);
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
 });
 </script>
 </body>
