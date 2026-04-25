@@ -1627,7 +1627,7 @@ function navyEnlisted(config) {
     }
     // Middle star (Command Master Chief) - between chevrons and rocker
     if (middleStar) {
-      elements += centerStar(50, 53, 5, silver);
+      elements += centerStar(50, 53, 5, goldStars ? gold : silver);
     }
     // Inverted rocker (arc above chevrons) in gold
     elements += `<path d="${rockerPathInverted(48, 5, 55)}" fill="${gold}" stroke="#000" stroke-width="0.3"/>`;
@@ -2155,7 +2155,7 @@ addRank({ id:'navy-e9-formc', grade:'E-9', name:'Fleet/Command Master Chief Pett
     ${navyEnlisted({stars:2, cpo:true}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
     ${centerStar(50, 53, 5.5, '#c8cdd4')}`) });
 addRank({ id:'navy-e9-mcpon', grade:'E-9', name:'Master Chief Petty Officer of the Navy', abbr:'MCPON', branch:'navy', category:'enlisted', tier:10,
-  svg: navyEnlisted({stars:2, cpo:true, goldStars:true, eagleLow:true}) });
+  svg: navyEnlisted({stars:3, cpo:true, goldStars:true}) });
 
 // ============ NAVY WARRANT ============
 addRank({ id:'navy-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'navy', category:'warrant', tier:1,

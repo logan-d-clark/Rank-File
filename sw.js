@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rank-file-v1';
+const CACHE_NAME = 'rank-file-v2';
 const urlsToCache = [
   '/Rank-File/',
   '/Rank-File/index.html',
