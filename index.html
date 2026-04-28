@@ -1314,7 +1314,7 @@ function armyChevron(config) {
   // Center device
   if (stars > 0) {
     // Position stars lower, centered between chevrons and rockers
-    const centerY = rockers > 0 ? 50 : 45;
+    const centerY = rockers > 0 ? 57 : 45;
     if (stars === 1) {
       elements += centerStar(50, centerY, 6, color);
     } else if (stars === 2) {
@@ -1963,17 +1963,17 @@ addRank({ id:'army-e8-msg', grade:'E-8', name:'Master Sergeant', abbr:'MSG', bra
 addRank({ id:'army-e8-1sg', grade:'E-8', name:'First Sergeant', abbr:'1SG', branch:'army', category:'enlisted', tier:8,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${armyChevron({chevrons:3, rockers:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <path d="M50,45 L55,50 L50,55 L45,50 Z" fill="#d4cdb5" stroke="#2a2a2a" stroke-width="0.4"/>`) });
+    <path d="M50,52 L55,57 L50,62 L45,57 Z" fill="#d4cdb5" stroke="#2a2a2a" stroke-width="0.4"/>`) });
 addRank({ id:'army-e9-sgm', grade:'E-9', name:'Sergeant Major', abbr:'SGM', branch:'army', category:'enlisted', tier:9,
   svg: armyChevron({chevrons:3, rockers:3, stars:1}) });
 addRank({ id:'army-e9-csm', grade:'E-9', name:'Command Sergeant Major', abbr:'CSM', branch:'army', category:'enlisted', tier:9,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${armyChevron({chevrons:3, rockers:3, stars:1}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    <circle cx="50" cy="50" r="10" fill="none" stroke="#d4cdb5" stroke-width="0.8" opacity="0.6"/>`) });
+    <circle cx="50" cy="57" r="10" fill="none" stroke="#d4cdb5" stroke-width="0.8" opacity="0.6"/>`) });
 addRank({ id:'army-e9-sma', grade:'E-9', name:'Sergeant Major of the Army', abbr:'SMA', branch:'army', category:'enlisted', tier:10,
   svg: svg(`<rect width="100" height="100" fill="#4b5320" rx="3"/>
     ${armyChevron({chevrons:3, rockers:3}).replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^>]*>/, '')}
-    ${eagle(50, 50, 22, '#d4cdb5')}`) });
+    ${eagle(50, 57, 22, '#d4cdb5')}`) });
 
 // ============ ARMY WARRANT ============
 addRank({ id:'army-w1', grade:'W-1', name:'Warrant Officer 1', abbr:'WO1', branch:'army', category:'warrant', tier:1,
@@ -2505,9 +2505,14 @@ function renderCard() {
     return;
   }
 
-  // Reset flip state FIRST, before any other DOM operations
+  // Reset flip state instantly (no transition) so the new card's answer
+  // is never visible on the back face during the flip-back animation.
+  const flashcard = $('flashcard');
+  flashcard.style.transition = 'none';
   session.flipped = false;
-  $('flashcard').classList.remove('flipped');
+  flashcard.classList.remove('flipped');
+  flashcard.offsetHeight; // force reflow so the snap registers before re-enabling transition
+  flashcard.style.transition = '';
 
   // Hide rating until flipped
   $('rating-row').classList.add('hidden');
